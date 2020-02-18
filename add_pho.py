@@ -1,4 +1,5 @@
-import argparse, re, sys, pdb
+import argparse, re, sys, pdb, os.path
+
 
 # Code for annotation regex. The speaker code should be group number -3
 code_regx = re.compile(r'([a-zA-Z][a-z+]*)( +)(&=)([A-Za-z]{1})(_)([A-Za-z]{1})(_)([A-Z]{1}[A-Z0-9]{2})(_)?(0x[a-z0-9]{6})?', re.IGNORECASE | re.DOTALL) # Annotation regex
@@ -104,5 +105,7 @@ if __name__ == '__main__':
     args = get_args()
     print 'Input file is {}'.format(args.input_file)
     add_pho_2_cha(args.input_file, args.output_path)
+    if(os.path.splitext(args.input_file)[1] == '.opf'):
+        print 'A file with .opf extension supplied!'
 
 
