@@ -80,7 +80,7 @@ def add_pho_2_cha(input_file, output_path):
 
     # Make a copy of the input lines to insert the pho lines into!
     out_lines = in_lines[:]
-    pos_list = []
+    pos_list = [] # pos_list is a list of tuples of the form (utterance count, index)
     for i, line in enumerate(in_lines):
         m = code_regx.search(line)
         if m and 'CHI' in m.groups():
@@ -96,16 +96,19 @@ def add_pho_2_cha(input_file, output_path):
         output_to_file(out_lines, output_path)
     return
 
-# This function is used to add pho lines into pho files.
-def add_pho_2_opf(input_file, output_path):
-    return
 
 
 if __name__ == '__main__':
     args = get_args()
     print 'Input file is {}'.format(args.input_file)
-    add_pho_2_cha(args.input_file, args.output_path)
     if(os.path.splitext(args.input_file)[1] == '.opf'):
         print 'A file with .opf extension supplied!'
+        print('This script currently does nothing for those :)')
+    elif(os.path.splitext(args.input_file)[1] == '.cha')):
+        print 'A file with .cha extension supplied!'
+        add_pho_2_cha(args.input_file, args.output_path)
+    else:
+        print('Sorry, I don\'t recognize the file extension :(')
+
 
 
