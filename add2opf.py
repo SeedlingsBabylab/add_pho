@@ -75,12 +75,12 @@ def process(in_lines):
     while i < len(in_lines):
         line = in_lines[i]
         m = code_reg.search(line)
+        # If a pho code was already added, we skip!
         if m and 'CHI' in m.groups() and '%pho' not in line:
             print line
             j = i + 1
             while j < i + 5:
                 if '%pho' in in_lines[j]:
-                    pdb.set_trace()
                     # group 2 contains the actual annotations.
                     # If the number of codes is more than 5, then don't add anything.
                     annots = m.group(2).split(',')
@@ -93,6 +93,11 @@ def process(in_lines):
                 j += 1
             else:
                 print('No pho cell could be found for line:\n{}'.format(line))
+        else:
+            # Bad code but I want visual confirmation of addition for now.
+            if m and 'CHI' in m.groups():
+                print(line)
+
         i += 1
 
 if __name__ == "__main__":
