@@ -1,0 +1,16 @@
+sample_data
+.idea
+*.pyc
+*.cha
+dist
+MANIFEST
+build
+.ipynb_checkpoints
+*.egg-info
+.vscode
+*.swp
+tags
+*.opf
+*.bak
+*~
+db
