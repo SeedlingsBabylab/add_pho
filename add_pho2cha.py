@@ -101,10 +101,10 @@ def add_pho_2_cha(input_file, output_path):
 if __name__ == '__main__':
     args = get_args()
     print 'Input file is {}'.format(args.input_file)
-    if(os.path.splitext(args.input_file)[1] == '.opf'):
+    if (os.path.splitext(args.input_file)[1] == '.opf'):
         print 'A file with .opf extension supplied!'
         print('This script currently does nothing for those :)')
-    elif(os.path.splitext(args.input_file)[1] == '.cha')):
+    elif (os.path.splitext(args.input_file)[1] == '.cha'):
         print 'A file with .cha extension supplied!'
         add_pho_2_cha(args.input_file, args.output_path)
     else:
