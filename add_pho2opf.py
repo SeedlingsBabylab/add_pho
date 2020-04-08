@@ -24,17 +24,17 @@ class opf_file:
                 if 'db' in namelist:
                     zpf.extractall()
                     self.namelist = zpf.namelist()
-                    self.in_lines = zpf.open('db').readlines()
+                    self.in_lines = [line.decode('utf-8') for line in zpf.open('db').readlines()]
                     os.remove('db')
 
 
                 else:
-                    print 'db file is not included in the opf! Exiting'
+                    print('db file is not included in the opf! Exiting')
                     exit()
 
         except BadZipfile as e:
-            print 'The supplied file does not look like an opf file (since it is not a zip file)?'
-            print e
+            print('The supplied file does not look like an opf file (since it is not a zip file)?')
+            print(e)
 
     def output(self, path=None):
         if path == None:
@@ -48,8 +48,8 @@ class opf_file:
                         os.remove(item)
 
         except BadZipfile as e:
-            print 'The supplied file does not look like an opf file (since it is not a zip file)?'
-            print e
+            print('The supplied file does not look like an opf file (since it is not a zip file)?')
+            print(e)
             
 
 # Check for the pho code in the header, if not there, add it!
@@ -68,7 +68,7 @@ def check_pho_code(in_lines):
                 print('skipping the pho code addition')
             else:
                 in_lines[i] = add_pho_code(line)
-                print('{} replaced with:\n {}'.format(line, in_lines[i]))
+                print(('{} replaced with:\n {}'.format(line, in_lines[i])))
 
 def process(in_lines):
     def add_pho_code(pho_line, line):
@@ -93,13 +93,13 @@ def process(in_lines):
                     if len(annots) >= 6:
                         break
                     in_lines[i] = add_pho_code(in_lines[j], line)
-                    print('{} replaced with:\n{} The line below was deleted:\n{}'.format(line, in_lines[i], in_lines[j]))
+                    print(('{} replaced with:\n{} The line below was deleted:\n{}'.format(line, in_lines[i], in_lines[j])))
                     del(in_lines[j])
                     i = j
                     break
                 j += 1
             else:
-                print('No pho cell could be found for line:\n{}'.format(line))
+                print(('No pho cell could be found for line:\n{}'.format(line)))
         else:
             # Bad code but I want visual confirmation of addition for now.
             if m and 'CHI' in m.groups():
