@@ -1,4 +1,16 @@
-## add_pho2cha.py
+## batch.sh
+
+By supplying a path file to the batch shell script, you can modify 
+opf files in bulk. The script is run like this:
+
+./batch.sh paths_to_opf_files.txt
+
+**NOTE:** The batch script uses gnu parallel to speed things up. It
+currently does not support sequential, so right your own shell script
+for that. 
+
+
+### add_pho2cha.py
 
 usage: add_pho2cha.py [-h] [--output_path OUTPUT_PATH] input_file
 
@@ -13,7 +25,7 @@ optional arguments:
                         Path of the output file, which is the updated cha
                         file, with pho lines added.
 
-## add_pho2opf.py
+### add_pho2opf.py
 
 usage: add_pho2opf.py [-h] [-o OUTPUT_PATH] input_file
 

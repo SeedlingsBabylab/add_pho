@@ -1,5 +1,7 @@
 from zipfile import ZipFile, BadZipfile
 import re, sys, pdb, os, pdb, argparse
+import os.path
+import tempfile
 
 
 
@@ -22,10 +24,10 @@ class opf_file:
             with ZipFile(path, 'r') as zpf:
                 namelist = zpf.namelist()
                 if 'db' in namelist:
-                    zpf.extractall()
+                    zpf.extractall(path=tmpdir)
                     self.namelist = zpf.namelist()
                     self.in_lines = [line.decode('utf-8') for line in zpf.open('db').readlines()]
-                    os.remove('db')
+                    os.remove(os.path.join(tmpdir, 'db'))
 
 
                 else:
@@ -109,7 +111,8 @@ def process(in_lines):
 
 if __name__ == "__main__":
     args = get_args()
-    myopf = opf_file(args.input_file)
-    check_pho_code(myopf.in_lines)
-    process(myopf.in_lines)
-    myopf.output(args.output_path)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        myopf = opf_file(args.input_file)
+        check_pho_code(myopf.in_lines)
+        process(myopf.in_lines)
+        myopf.output(args.output_path)
