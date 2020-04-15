@@ -46,8 +46,7 @@ class opf_file:
                 zpf.writestr('db', ''.join(self.in_lines))
                 for item in self.namelist:
                     if item != 'db':
-                        zpf.write(item)
-                        os.remove(item)
+                        zpf.write(os.path.join(tmpdir, item), item)
 
         except BadZipfile as e:
             print('The supplied file does not look like an opf file (since it is not a zip file)?')
