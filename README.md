@@ -5,6 +5,8 @@ opf files in bulk. The script is run like this:
 
 ./batch.sh paths_to_opf_files.txt
 
+The errors, if there are any, will be printed to stdout.
+
 **NOTE:** The batch script uses gnu parallel to speed things up. It
 currently does not support sequential, so right your own shell script
 for that. 

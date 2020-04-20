@@ -74,7 +74,7 @@ def check_pho_code(in_lines):
 def process(in_lines):
     def add_pho_code(pho_line, line):
         pat = re.compile('\((.*)\)')
-        pho = re.compile('(%pho:[^,]*),')
+        pho = re.compile('(%pho:?[^,]*),')
         m = pat.search(line).group(1)
         ph = pho.search(pho_line)
         return line.replace(m, m + ',' + ph.group(1))
