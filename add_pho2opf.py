@@ -96,7 +96,6 @@ def process(in_lines):
                     in_lines[i] = add_pho_code(in_lines[j], line)
                     print(('{} replaced with:\n{} The line below was deleted:\n{}'.format(line, in_lines[i], in_lines[j])))
                     del(in_lines[j])
-                    i = j
                     break
                 j += 1
             else:
