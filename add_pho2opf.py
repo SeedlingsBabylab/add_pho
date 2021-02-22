@@ -6,6 +6,7 @@ import tempfile
 
 
 
+
 code_reg = re.compile(r'([0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{3}),\((.*,[a-z],[a-z],([A-Z]{3}),.*)\)')
 
 def get_args():
@@ -77,7 +78,7 @@ def process(in_lines):
         pho = re.compile('(%pho:?[^,]*),')
         m = pat.search(line).group(1)
         ph = pho.search(pho_line)
-        return line.replace(m, m + ',' + ph.group(1))
+        return line.replace(m, m.rstrip(',') + ',' + ph.group(1).rstrip(','))
 
     i = 0
     while i < len(in_lines):
@@ -91,7 +92,7 @@ def process(in_lines):
                     # group 2 contains the actual annotations.
                     # If the number of codes is more than 5, then don't add anything.
                     annots = m.group(2).split(',')
-                    if len(annots) >= 6:
+                    if sum(1 for e in annots if e) >= 6:
                         break
                     in_lines[i] = add_pho_code(in_lines[j], line)
                     print(('{} replaced with:\n{} The line below was deleted:\n{}'.format(line, in_lines[i], in_lines[j])))
