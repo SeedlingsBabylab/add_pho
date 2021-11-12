@@ -4,6 +4,7 @@ import os
 import re
 
 import pandas as pd
+import numpy as np
 
 
 class OPFFile(object):
@@ -92,9 +93,20 @@ def collect_all_chi(opf: OPFFile):
     # Is there at least one character after the prefix?
     chi_with_pho['is_pho_cell_filled'] = chi_with_pho.object_pho.str[len(PHO_PREFIX):].str.strip().str.len() > 0
 
-    chi_with_pho['is_pho_field'] = 'pho' in chi_with_pho.columns
+    # Is there a pho field
+    is_pho_field = 'pho' in chi_with_pho.columns
+    chi_with_pho['is_pho_field'] = is_pho_field
 
-    chi_with_pho['is_pho_field_filled'] = chi_with_pho.pho.str.strip().str.len() > 0
+    # Does it have anything in it?
+    # First, check that they all have the same prefix "%pho: "
+    assert chi_with_pho.object_pho.str.startswith(PHO_PREFIX).all()
+    # Is there at least one character after the prefix?
+    if is_pho_field:
+        chi_with_pho['is_pho_field_filled'] = chi_with_pho.pho.str[len(PHO_PREFIX):].str.strip().str.len() > 0
+    # If there was no pho field, add a NaN column. This is different from an empty pho field which is an empty string.
+    else:
+        chi_with_pho['pho'] = np.nan
+        chi_with_pho['is_pho_field_filled'] = np.nan
 
     return chi_with_pho
 
