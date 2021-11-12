@@ -9,11 +9,11 @@ import pandas as pd
 class OPFFile(object):
     def __init__(self, path):
         self.path = path
-        self.db, self.project = self.load()
+        self.db, self.other = self.load()
 
     def load(self):
         with ZipFile(self.path, 'r') as zpf:
-            assert set(zpf.namelist()) == {'db', 'project'}
+            assert 'db' in zpf.namelist(), f'The file at {self.path} does not contain "db". Not an OPF file?'
 
             # Annotations
             with zpf.open('db', 'r') as f:
@@ -21,11 +21,12 @@ class OPFFile(object):
             # zpf.open read file in binary mode
             db = [line.decode('utf-8') for line in db]
 
-            # Metadata
-            with zpf.open('project', 'r') as f:
-                project = f.read()
+            # Other components
+            other_files = {name: zpf.open(name, 'r').read()
+                           for name in zpf.namelist()
+                           if name != 'db'}
 
-        return db, project
+        return db, other_files
 
     def to_pandas_df(self):
         # Extract field names
