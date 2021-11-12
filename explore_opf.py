@@ -1,3 +1,4 @@
+import datetime
 from pathlib import Path
 from zipfile import ZipFile
 import os
@@ -69,19 +70,29 @@ def collect_all_chi(opf: OPFFile):
     is_pho = df.object.str.contains(PHO_PREFIX)
     assert (df[is_pho].time_start == df[is_pho].time_end).all()
 
-    # Merge
+    # # Merge
+    # We will first need to convert time_end to datetime
+    random_date = str(datetime.datetime.strptime('1988-11-11', '%Y-%m-%d').date())
+    df['time_end'] = pd.to_datetime(random_date + " " + df.time_end.astype(str))
+
     # The only fields in %pho rows we care about are time_end, annotid and object. Others are either empty or redundant
     # (time_start == time_end is True)
-    chi_with_pho = df[is_chi].merge(
-        df[is_pho][['object', 'id', 'time_end']],
-        on='time_end',
+    chi_with_pho = pd.merge_asof(
+        df[is_chi],
+        # rename time_end to keep both times for approximate matches
+        df[is_pho][['object', 'id', 'time_end']].rename(columns={'time_end': 'time_end_pho'}),
+        left_on='time_end',
+        right_on='time_end_pho',
         suffixes=('', '_pho'),
-        how='outer',
-        # Check for non-one-to-one matches
-        validate='1:1')
+        direction='nearest',
+        tolerance=pd.Timedelta('0.5s'))
 
-    # Check for orphan %pho's
-    assert chi_with_pho.object.isna().sum() == 0
+    # Add orphan %pho's if any by merging with all the pho's on annotid
+    chi_with_pho = chi_with_pho.merge(
+        df[is_pho][['id', 'object']].rename(columns={'id': 'id_pho', 'object': 'object_pho'}),
+        on=['id_pho', 'object_pho'],
+        how='right'
+    )
 
     # # Add flags from the table above
 
