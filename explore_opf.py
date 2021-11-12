@@ -58,13 +58,15 @@ class OPFFile(object):
 
 
 def collect_all_chi(opf: OPFFile):
-    df = opf.to_pandas_df()
+    PHO_PREFIX = r'^%pho:?(?:&|\s+)'
+
+    df: pd.DataFrame = opf.to_pandas_df()
 
     # Find child utterances
     is_chi = df.speaker == 'CHI'
 
     # Find phonetic transcriptions in separate cells
-    is_pho = df.object.str.startswith('%pho')
+    is_pho = df.object.str.contains(PHO_PREFIX)
     assert (df[is_pho].time_start == df[is_pho].time_end).all()
 
     # Merge
@@ -88,21 +90,20 @@ def collect_all_chi(opf: OPFFile):
 
     # Does it have anything in it?
     # First, check that they all have the same prefix "%pho: "
-    PHO_PREFIX = '%pho: '
-    assert chi_with_pho.object_pho.str.startswith(PHO_PREFIX).all()
+    assert chi_with_pho.object_pho.str.contains(PHO_PREFIX).all()
     # Is there at least one character after the prefix?
-    chi_with_pho['is_pho_cell_filled'] = chi_with_pho.object_pho.str[len(PHO_PREFIX):].str.strip().str.len() > 0
+    chi_with_pho['is_pho_cell_filled'] = chi_with_pho.object_pho.str.replace(PHO_PREFIX, '', regex=True).str.len() > 0
 
     # Is there a pho field
     is_pho_field = 'pho' in chi_with_pho.columns
     chi_with_pho['is_pho_field'] = is_pho_field
 
     # Does it have anything in it?
-    # First, check that they all have the same prefix "%pho: "
-    assert chi_with_pho.object_pho.str.startswith(PHO_PREFIX).all()
+    # First, check that they all have the same prefix "%pho"
+    assert chi_with_pho.object_pho.str.contains(PHO_PREFIX).all()
     # Is there at least one character after the prefix?
     if is_pho_field:
-        chi_with_pho['is_pho_field_filled'] = chi_with_pho.pho.str[len(PHO_PREFIX):].str.strip().str.len() > 0
+        chi_with_pho['is_pho_field_filled'] = chi_with_pho.pho.str.replace(PHO_PREFIX, '', regex=True).str.len() > 0
     # If there was no pho field, add a NaN column. This is different from an empty pho field which is an empty string.
     else:
         chi_with_pho['pho'] = np.nan
@@ -124,7 +125,7 @@ print(chi_with_pho
 # # Find all opfs
 
 # Locate Subject_Files
-pn_opus_dir = Path(os.environ.get('pn_opus') or '/Volumes/pn-opus-1')
+pn_opus_dir = Path(os.environ.get('pn_opus') or '/Volumes/pn-opus')
 assert pn_opus_dir.exists(), f'Mount pn-opus or set env var "pn_opus" to actual path instead of {pn_opus_dir}'
 subject_files_dir = pn_opus_dir / 'Seedlings' / 'Subject_Files'
 
@@ -160,3 +161,5 @@ opf_paths = find_matching(list_of_roots, pattern)
 
 opfs = list(map(OPFFile, opf_paths))
 all_chis = list(map(collect_all_chi, opfs))
+# Find all the orphan phos
+
