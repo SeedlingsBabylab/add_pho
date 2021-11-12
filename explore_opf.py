@@ -73,7 +73,7 @@ def collect_all_chi(opf: OPFFile):
     # The only fields in %pho rows we care about are time_end, annotid and object. Others are either empty or redundant
     # (time_start == time_end is True)
     chi_with_pho = df[is_chi].merge(
-        df[is_pho][['object', 'time_end']],
+        df[is_pho][['object', 'id', 'time_end']],
         on='time_end',
         suffixes=('', '_pho'),
         how='outer',
