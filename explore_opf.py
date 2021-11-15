@@ -44,7 +44,8 @@ class OPFFile(object):
         # Each data row in db is in this format: <time_start>,<time_end>,(<field1>,...,<fieldN>)
         def row_to_values(row):
             values = row.split(',', maxsplit=2)
-            values = values[:2] + values[2].strip('()').split(',')
+            # Commas within filed values are escaped by a backslash - we don't want to split on those
+            values = values[:2] + re.split(r'(?<!\\),', values[2].strip('()'))
             return values
         data = list(map(row_to_values, self.db[2:]))
 
