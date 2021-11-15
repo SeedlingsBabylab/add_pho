@@ -72,19 +72,21 @@ def collect_all_chi(opf: OPFFile):
 
     # Find phonetic transcriptions in separate cells
     is_pho = df.object.str.contains(PHO_PREFIX)
-    assert (df[is_pho].time_start == df[is_pho].time_end).all()
 
     # # Merge
     # We will first need to convert time_end to datetime
     random_date = str(datetime.datetime.strptime('1988-11-11', '%Y-%m-%d').date())
     df['time_end'] = pd.to_datetime(random_date + " " + df.time_end.astype(str))
 
-    # The only fields in %pho rows we care about are time_end, annotid and object. Others are either empty or redundant
-    # (time_start == time_end is True)
+    # The only fields in %pho rows we care about are time_start, time_end, annotid and object. The other ones should be
+    # empty ('NA' for original columns, '' for the 'pho' column). Let's check that.
+    columns_to_keep = ['object', 'id', 'time_start', 'time_end']
+    df[is_pho].drop(columns_to_keep, axis='columns').isin(['NA', '']).all().all()
+
     chi_with_pho = pd.merge_asof(
         df[is_chi],
         # rename time_end to keep both times for approximate matches
-        df[is_pho][['object', 'id', 'time_end']].rename(columns={'time_end': 'time_end_pho'}),
+        df[is_pho][columns_to_keep].rename(columns={'time_end': 'time_end_pho'}),
         left_on='time_end',
         right_on='time_end_pho',
         suffixes=('', '_pho'),
