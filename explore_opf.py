@@ -63,6 +63,9 @@ def collect_all_chi(opf: OPFFile):
 
     df: pd.DataFrame = opf.to_pandas_df()
 
+    # Sort by time_end
+    df.sort_values(by='time_end', inplace=True)
+
     # Find child utterances
     is_chi = df.speaker == 'CHI'
 
