@@ -95,9 +95,10 @@ def collect_all_chi(opf: OPFFile):
         tolerance=pd.Timedelta('0.5s'))
 
     # Add orphan %pho's if any by merging with all the pho's on annotid
+    pho_columns = [column + '_pho' for column in columns_to_keep]
     chi_with_pho = chi_with_pho.merge(
-        df[is_pho][columns_to_keep].rename(columns={'id': 'id_pho', 'object': 'object_pho'}),
-        on=['id_pho', 'object_pho'],
+        df[is_pho][columns_to_keep].rename(columns=dict(zip(columns_to_keep, pho_columns))),
+        on=pho_columns,
         how='right'
     )
 
