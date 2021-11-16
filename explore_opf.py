@@ -95,7 +95,7 @@ def collect_all_chi(opf: OPFFile):
 
     # Add orphan %pho's if any by merging with all the pho's on annotid
     chi_with_pho = chi_with_pho.merge(
-        df[is_pho][['id', 'object']].rename(columns={'id': 'id_pho', 'object': 'object_pho'}),
+        df[is_pho][columns_to_keep].rename(columns={'id': 'id_pho', 'object': 'object_pho'}),
         on=['id_pho', 'object_pho'],
         how='right'
     )
