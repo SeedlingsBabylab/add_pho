@@ -79,9 +79,10 @@ def collect_all_chi(opf: OPFFile):
     df['time_end'] = pd.to_datetime(random_date + " " + df.time_end.astype(str))
 
     # The only fields in %pho rows we care about are time_start, time_end, annotid and object. The other ones should be
-    # empty ('NA' for original columns, '' for the 'pho' column). Let's check that.
+    # empty ('NA' for original columns, '' for the 'pho' column). Sometimes the speaker field value is 'NA\, NEW' or
+    # just 'NEW'
     columns_to_keep = ['object', 'id', 'time_start', 'time_end']
-    assert df[is_pho].drop(columns_to_keep, axis='columns').isin(['NA', '']).all().all()
+    assert df[is_pho].drop(columns_to_keep, axis='columns').isin(['NA', '', 'NA\\, NEW', 'NEW']).all().all()
 
     chi_with_pho = pd.merge_asof(
         df[is_chi],
@@ -179,4 +180,23 @@ opf_paths = find_matching(list_of_roots, pattern)
 opfs = list(map(OPFFile, opf_paths))
 all_chis = list(map(collect_all_chi, opfs))
 # Find all the orphan phos
+
+
+# # Find all the orphan phos
+orphans = pd.concat(objs=[df[df.object.isna()] for df in all_chis],
+                    keys=[opf.path for opf in opfs],
+                    names=['file_path', 'index'])
+
+# Clean and save to a csv
+# '_y' suffixes are from the extra merge to find the orphan pho's in collect_all_chi function. Could've been avoided.
+orphans = (orphans[['object_pho', 'id_pho', 'time_start_y', 'time_end_y']]
+           .rename(columns=dict(time_start_x='time_start', time_end_y='time_end')))
+# A random date was added to time for technical reasons, we don't need it anymore
+orphans.time_end = orphans.time_end.dt.time
+
+# Save
+output_path = Path('reports') / 'orphan_phos.csv'
+output_path.parent.mkdir(exist_ok=True)
+orphans.to_csv(output_path, index=False)
+
 
