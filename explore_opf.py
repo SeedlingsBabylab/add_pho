@@ -198,5 +198,23 @@ orphans_output_path.parent.mkdir(exist_ok=True)
 orphans.to_csv(orphans_output_path, index=False)
 
 
+# Find all the non-unique ids (not one-to-one matches)
+def find_duplicates(chis: pd.DataFrame):
+    return pd.concat(
+        objs=[chis[(chis.duplicated(subset=['id', 'time_start', 'time_end'], keep=False)
+                    & ~chis.object.isna())],  # don't count empty rows as duplicates of each other
+              chis[(chis.duplicated(subset=['id_pho', 'time_start_pho', 'time_end_pho'], keep=False)
+                    & ~chis.object_pho.isna())]],
+        keys=['CHIs sharing a %pho', '%phos sharing a CHI'],
+    )
 
+
+duplicates = pd.concat(
+    objs=map(find_duplicates, all_chis),
+    keys=[opf.path for opf in opfs],
+    names=['file_path', 'type of duplicate', 'index'])
+
+duplicates_output_path = Path('repo') / 'reports' / 'duplicates.csv'
+duplicates_output_path.parent.mkdir(exist_ok=True)
+duplicates.reset_index([0, 1]).to_csv(duplicates_output_path, index=False)
 
