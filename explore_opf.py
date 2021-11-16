@@ -190,11 +190,8 @@ orphans = pd.concat(objs=[df[df.object.isna()] for df in all_chis],
 # Clean and save to a csv
 # A random date was added to time for technical reasons, we don't need it anymore
 orphans.time_end = orphans.time_end.dt.time
-orphans = orphans[['object_pho', 'id_pho', 'time_start', 'time_end']]
+orphans = orphans[['object_pho', 'id_pho', 'time_start_pho', 'time_end_pho']].reset_index(0)
 
 # Save
-output_path = Path('repo') / 'reports' / 'orphan_phos.csv'
-output_path.parent.mkdir(exist_ok=True)
-orphans.to_csv(output_path, index=False)
 
 
