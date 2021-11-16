@@ -131,14 +131,6 @@ def collect_all_chi(opf: OPFFile):
     return chi_with_pho
 
 
-opf_path = Path('01_17_sparse_code.opf')
-opf = OPFFile(opf_path)
-chi_with_pho = collect_all_chi(opf)
-
-# Make a pivot table
-print(chi_with_pho
-      .groupby(['is_pho_cell', 'is_pho_cell_filled', 'is_pho_field', 'is_pho_field_filled'])
-      .size())
 
 
 # # Find all opfs
