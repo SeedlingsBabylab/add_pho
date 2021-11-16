@@ -180,7 +180,6 @@ opf_paths = find_matching(list_of_roots, pattern)
 
 opfs = list(map(OPFFile, opf_paths))
 all_chis = list(map(collect_all_chi, opfs))
-# Find all the orphan phos
 
 
 # # Find all the orphan phos
