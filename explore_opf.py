@@ -81,7 +81,7 @@ def collect_all_chi(opf: OPFFile):
     # The only fields in %pho rows we care about are time_start, time_end, annotid and object. The other ones should be
     # empty ('NA' for original columns, '' for the 'pho' column). Let's check that.
     columns_to_keep = ['object', 'id', 'time_start', 'time_end']
-    df[is_pho].drop(columns_to_keep, axis='columns').isin(['NA', '']).all().all()
+    assert df[is_pho].drop(columns_to_keep, axis='columns').isin(['NA', '']).all().all()
 
     chi_with_pho = pd.merge_asof(
         df[is_chi],
