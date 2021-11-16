@@ -188,14 +188,12 @@ orphans = pd.concat(objs=[df[df.object.isna()] for df in all_chis],
                     names=['file_path', 'index'])
 
 # Clean and save to a csv
-# '_y' suffixes are from the extra merge to find the orphan pho's in collect_all_chi function. Could've been avoided.
-orphans = (orphans[['object_pho', 'id_pho', 'time_start_y', 'time_end_y']]
-           .rename(columns=dict(time_start_x='time_start', time_end_y='time_end')))
 # A random date was added to time for technical reasons, we don't need it anymore
 orphans.time_end = orphans.time_end.dt.time
+orphans = orphans[['object_pho', 'id_pho', 'time_start', 'time_end']]
 
 # Save
-output_path = Path('reports') / 'orphan_phos.csv'
+output_path = Path('repo') / 'reports' / 'orphan_phos.csv'
 output_path.parent.mkdir(exist_ok=True)
 orphans.to_csv(output_path, index=False)
 
