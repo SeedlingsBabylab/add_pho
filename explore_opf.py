@@ -193,5 +193,10 @@ orphans.time_end = orphans.time_end.dt.time
 orphans = orphans[['object_pho', 'id_pho', 'time_start_pho', 'time_end_pho']].reset_index(0)
 
 # Save
+orphans_output_path = Path('repo') / 'reports' / 'orphan_phos.csv'
+orphans_output_path.parent.mkdir(exist_ok=True)
+orphans.to_csv(orphans_output_path, index=False)
+
+
 
 
