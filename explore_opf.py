@@ -87,18 +87,6 @@ def add_flags(chis_with_phos):
     return chis_with_phos
 
 
-def _open_db_in_text_editor(path_to_opf):
-    """
-    Opens and opf file in the default text editor
-    May overwirte files, be careful.
-    :param path_to_opf: full path
-    :return: nothing
-    """
-    os.system(f'cp {path_to_opf} ~/blab/zhenya/test.opf')
-    os.system('unzip -o test.opf')  # -o - overwrite without prompting
-    os.system('open db')
-
-
 # # Find all opfs
 
 # Locate Subject_Files
