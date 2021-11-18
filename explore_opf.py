@@ -64,10 +64,9 @@ class OPFDataFrame(object):
 
         return df
 
+PHO_PREFIX = r'^%pho:?(?:&|\s+)'
 
 def collect_all_chi(opf: OPFDataFrame):
-    PHO_PREFIX = r'^%pho:?(?:&|\s+)'
-
     df: pd.DataFrame = opf.df
 
     # Sort by time_end
@@ -90,7 +89,7 @@ def collect_all_chi(opf: OPFDataFrame):
     columns_to_keep = ['object', 'id', 'time_start', 'time_end']
     assert df[is_pho].drop(columns_to_keep, axis='columns').isin(['NA', '', 'NA\\, NEW', 'NEW']).all().all()
 
-    chi_with_pho = pd.merge_asof(
+    chis_with_phos = pd.merge_asof(
         df[is_chi],
         # rename time_end to keep both times for approximate matches
         df[is_pho][columns_to_keep].rename(columns={'time_end': 'time_end_pho'}),
@@ -102,39 +101,43 @@ def collect_all_chi(opf: OPFDataFrame):
 
     # Add orphan %pho's if any by merging with all the pho's on annotid
     pho_columns = [column + '_pho' for column in columns_to_keep]
-    chi_with_pho = chi_with_pho.merge(
+    chis_with_phos = chis_with_phos.merge(
         df[is_pho][columns_to_keep].rename(columns=dict(zip(columns_to_keep, pho_columns))),
         on=pho_columns,
         how='outer'
     )
 
+    return chis_with_phos
+
+
+def add_flags(chis_with_phos):
     # # Add flags from the table above
 
     # Is there a pho cell?
-    chi_with_pho['is_pho_cell'] = ~chi_with_pho.object_pho.isna()
+    chis_with_phos['is_pho_cell'] = ~chis_with_phos.object_pho.isna()
 
     # Does it have anything in it?
     # First, check that they all have the same prefix "%pho: "
-    assert chi_with_pho.object_pho.str.contains(PHO_PREFIX).all()
+    assert chis_with_phos.object_pho.str.contains(PHO_PREFIX).all()
     # Is there at least one character after the prefix?
-    chi_with_pho['is_pho_cell_filled'] = chi_with_pho.object_pho.str.replace(PHO_PREFIX, '', regex=True).str.len() > 0
+    chis_with_phos['is_pho_cell_filled'] = chis_with_phos.object_pho.str.replace(PHO_PREFIX, '', regex=True).str.len() > 0
 
     # Is there a pho field
-    is_pho_field = 'pho' in chi_with_pho.columns
-    chi_with_pho['is_pho_field'] = is_pho_field
+    is_pho_field = 'pho' in chis_with_phos.columns
+    chis_with_phos['is_pho_field'] = is_pho_field
 
     # Does it have anything in it?
     # First, check that they all have the same prefix "%pho"
-    assert chi_with_pho.object_pho.str.contains(PHO_PREFIX).all()
+    assert chis_with_phos.object_pho.str.contains(PHO_PREFIX).all()
     # Is there at least one character after the prefix?
     if is_pho_field:
-        chi_with_pho['is_pho_field_filled'] = chi_with_pho.pho.str.replace(PHO_PREFIX, '', regex=True).str.len() > 0
+        chis_with_phos['is_pho_field_filled'] = chis_with_phos.pho.str.replace(PHO_PREFIX, '', regex=True).str.len() > 0
     # If there was no pho field, add a NaN column. This is different from an empty pho field which is an empty string.
     else:
-        chi_with_pho['pho'] = np.nan
-        chi_with_pho['is_pho_field_filled'] = np.nan
+        chis_with_phos['pho'] = np.nan
+        chis_with_phos['is_pho_field_filled'] = np.nan
 
-    return chi_with_pho
+    return chis_with_phos
 
 
 def _open_db_in_text_editor(path_to_opf):
@@ -190,6 +193,8 @@ opf_files = list(map(OPFFile, opf_paths))
 opf_df = list(map(OPFDataFrame, opf_files))
 
 all_chis = list(map(collect_all_chi, opf_df))
+
+all_chis_with_flags = list(map(add_flags, all_chis))
 
 
 # # Find all the orphan phos
