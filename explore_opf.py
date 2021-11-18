@@ -99,7 +99,7 @@ def collect_all_chi(opf: OPFFile):
     chi_with_pho = chi_with_pho.merge(
         df[is_pho][columns_to_keep].rename(columns=dict(zip(columns_to_keep, pho_columns))),
         on=pho_columns,
-        how='right'
+        how='outer'
     )
 
     # # Add flags from the table above
