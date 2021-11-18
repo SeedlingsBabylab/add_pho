@@ -30,11 +30,17 @@ class OPFFile(object):
 
         return db, other_files
 
-    def to_pandas_df(self):
+
+class OPFDataFrame(object):
+    def __init__(self, opf_file: OPFFile):
+        self.opf_file = opf_file
+        self.df = self._opf_to_pandas_df()
+
+    def _opf_to_pandas_df(self):
         # Extract field names
         # There is a single datavyu column "labeled_object" defined in the second line of "db".
         # The format of this line is <column-definition>-<field_definitions>
-        field_definitions = self.db[1].split('-')[1]
+        field_definitions = self.opf_file.db[1].split('-')[1]
         # Field definitions are comma-separated, each definition has the following format: <field_name>|<field_type>
         field_names = [field_definition.split('|')[0] for field_definition in field_definitions.split(',')]
         # The first two columns contain timestamps
@@ -47,7 +53,7 @@ class OPFFile(object):
             # Commas within filed values are escaped by a backslash - we don't want to split on those
             values = values[:2] + re.split(r'(?<!\\),', values[2].strip('()'))
             return values
-        data = list(map(row_to_values, self.db[2:]))
+        data = list(map(row_to_values, self.opf_file.db[2:]))
 
         # Bind
         df = pd.DataFrame(columns=field_names, data=data)
@@ -59,10 +65,10 @@ class OPFFile(object):
         return df
 
 
-def collect_all_chi(opf: OPFFile):
+def collect_all_chi(opf: OPFDataFrame):
     PHO_PREFIX = r'^%pho:?(?:&|\s+)'
 
-    df: pd.DataFrame = opf.to_pandas_df()
+    df: pd.DataFrame = opf.df
 
     # Sort by time_end
     df.sort_values(by='time_end', inplace=True)
@@ -131,6 +137,16 @@ def collect_all_chi(opf: OPFFile):
     return chi_with_pho
 
 
+def _open_db_in_text_editor(path_to_opf):
+    """
+    Opens and opf file in the default text editor
+    May overwirte files, be careful.
+    :param path_to_opf: full path
+    :return: nothing
+    """
+    os.system(f'cp {path_to_opf} ~/blab/zhenya/test.opf')
+    os.system('unzip -o test.opf')  # -o - overwrite without prompting
+    os.system('open db')
 
 
 # # Find all opfs
@@ -170,8 +186,10 @@ list_of_roots = [subject_files_dir]
 pattern = opf_path
 opf_paths = find_matching(list_of_roots, pattern)
 
-opfs = list(map(OPFFile, opf_paths))
-all_chis = list(map(collect_all_chi, opfs))
+opf_files = list(map(OPFFile, opf_paths))
+opf_df = list(map(OPFDataFrame, opf_files))
+
+all_chis = list(map(collect_all_chi, opf_df))
 
 
 # # Find all the orphan phos
@@ -232,3 +250,5 @@ grand_pivot = (pivots
                .reset_index())
 
 
+n_chi = sum([(opf.to_pandas_df().speaker == 'CHI').sum() for opf in opfs])
+next(chis for chis in all_chis if )
