@@ -210,3 +210,25 @@ duplicates_output_path = Path('repo') / 'reports' / 'duplicates.csv'
 duplicates_output_path.parent.mkdir(exist_ok=True)
 duplicates.reset_index([0, 1]).to_csv(duplicates_output_path, index=False)
 
+
+# Pivot tables
+def make_pivot(chis):
+    return (chis
+            .groupby(['is_pho_cell', 'is_pho_cell_filled', 'is_pho_field', 'is_pho_field_filled'], dropna=False)
+            .size()
+            .to_frame('size')
+            .reset_index())
+
+
+pivots = pd.concat(
+    objs=map(make_pivot, all_chis),
+    keys=[opf.path for opf in opfs],
+    names=['file_path', 'index']
+)
+
+grand_pivot = (pivots
+               .groupby(['is_pho_cell', 'is_pho_cell_filled', 'is_pho_field', 'is_pho_field_filled'], dropna=False)
+               .sum()
+               .reset_index())
+
+
