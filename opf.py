@@ -1,5 +1,7 @@
 import re
+import os
 from zipfile import ZipFile
+import tempfile
 
 import pandas as pd
 
@@ -25,6 +27,13 @@ class OPFFile(object):
                            if name != 'db'}
 
         return db, other_files
+
+    def read_in_editor(self):
+        zf = ZipFile(self.path)
+        tempdir = tempfile.mkdtemp()
+        zf.extractall(tempdir)
+        db_path = os.path.join(tempdir, 'db')
+        os.system(f'open {db_path}')
 
 
 class OPFDataFrame(object):
