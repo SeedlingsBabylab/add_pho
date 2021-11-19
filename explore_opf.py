@@ -12,28 +12,31 @@ PHO_PREFIX = r'^%pho:?(?:&|\s+)'
 
 
 def collect_all_chi(opf: OPFDataFrame):
+    """
+    Finds all CHI and %pho cells and establishes their correspondence.
+    :param opf: OPFDataFrame object
+    :return: opf.df with only the CHI rows and with additional columns corresponding to the pho cell.
+    """
     df: pd.DataFrame = opf.df
 
-    # Sort by time_end
+    # For the fuzzy merging (time_end of CHI and %pho being approximately equal), we will need time_end to be a numeric
+    # (datetime in this case) column and sorted.
     df.sort_values(by='time_end', inplace=True)
-
-    # Find child utterances
-    is_chi = df.speaker == 'CHI'
-
-    # Find phonetic transcriptions in separate cells
-    is_pho = df.object.str.contains(PHO_PREFIX)
-
-    # # Merge
-    # We will first need to convert time_end to datetime
-    random_date = str(datetime.datetime.strptime('1988-11-11', '%Y-%m-%d').date())
+    # To convert time to datetime, we will add an arbitrary date.
+    random_date = '1988-11-01'
     df['time_end'] = pd.to_datetime(random_date + " " + df.time_end.astype(str))
 
-    # The only fields in %pho rows we care about are time_start, time_end, annotid and object. The other ones should be
-    # empty ('NA' for original columns, '' for the 'pho' column). Sometimes the speaker field value is 'NA\, NEW' or
-    # just 'NEW'
+    # Find child utterance and pho cells
+    is_chi = df.speaker == 'CHI'
+    is_pho = df.object.str.contains(PHO_PREFIX)
+
+    # We will only need some columns from the pho cells: time_start, time_end, annotid and object. The other ones should
+    # be empty ('NA' for original columns, '' for the 'pho' column). The exception is that sometimes the speaker field
+    # value is 'NA\, NEW' or 'NEW' - we can disregard this information.
     columns_to_keep = ['object', 'id', 'time_start', 'time_end']
     assert df[is_pho].drop(columns_to_keep, axis='columns').isin(['NA', '', 'NA\\, NEW', 'NEW']).all().all()
 
+    # # Merge
     chis_with_phos = pd.merge_asof(
         df[is_chi],
         # rename time_end to keep both times for approximate matches
@@ -44,7 +47,10 @@ def collect_all_chi(opf: OPFDataFrame):
         direction='nearest',
         tolerance=pd.Timedelta('0.5s'))
 
-    # Add orphan %pho's if any by merging with all the pho's on annotid
+    # Add orphan %pho's - if any - by merging with all the pho's on annotid.
+    # By merging on all the pho columns, we won't add any new columns.
+    # If multiple CHI cells were found to correspond to a single pho cell, this will result in duplicate columns. Same
+    # will happen if there identical pho rows.
     pho_columns = [column + '_pho' for column in columns_to_keep]
     chis_with_phos = chis_with_phos.merge(
         df[is_pho][columns_to_keep].rename(columns=dict(zip(columns_to_keep, pho_columns))),
@@ -56,7 +62,11 @@ def collect_all_chi(opf: OPFDataFrame):
 
 
 def add_flags(chis_with_phos):
-    # # Add flags from the table above
+    """
+    Adds binary columns 'is_pho_cell', 'is_pho_cell_filled', 'is_pho_field', 'pho', 'is_pho_field_filled'
+    :param chis_with_phos: output of collect_all_chi
+    :return: chis_with_phos with four additional columns.
+    """
 
     # Is there a pho cell?
     chis_with_phos['is_pho_cell'] = ~chis_with_phos.object_pho.isna()
@@ -85,18 +95,22 @@ def add_flags(chis_with_phos):
     return chis_with_phos
 
 
+# # Main
 
+# locate all the opf files
+opf_path_pattern = r'\d{2}/\d{2}_\d{2}/Home_Visit/Coding/Video_Annotation/\d{2}_\d{2}_sparse_code.opf'
+opf_paths = find_matching(list_of_roots=[subject_files_dir], pattern=opf_path_pattern)
 
+# Read and convert to dataframes
 opf_files = list(map(OPFFile, opf_paths))
 opf_df = list(map(OPFDataFrame, opf_files))
 
-all_chis = list(map(collect_all_chi, opf_df))
-
-all_chis_with_flags = list(map(add_flags, all_chis))
+# Find all the CHIs, the corresponding phos, and classify them
+all_chis_with_phos = list(map(collect_all_chi, opf_df))
 
 
 # # Find all the orphan phos
-orphans = pd.concat(objs=[df[df.object.isna()] for df in all_chis],
+orphans = pd.concat(objs=[df[df.object.isna()] for df in all_chis_with_phos],
                     keys=[opf.path for opf in opf_files],
                     names=['file_path', 'index'])
 
@@ -123,8 +137,8 @@ def find_duplicates(chis: pd.DataFrame):
 
 
 duplicates = pd.concat(
-    objs=map(find_duplicates, all_chis),
-    keys=[opf.path for opf in opfs],
+    objs=map(find_duplicates, all_chis_with_phos),
+    keys=[opf.path for opf in opf_files],
     names=['file_path', 'type of duplicate', 'index'])
 
 duplicates_output_path = Path('repo') / 'reports' / 'duplicates.csv'
@@ -132,7 +146,10 @@ duplicates_output_path.parent.mkdir(exist_ok=True)
 duplicates.reset_index([0, 1]).to_csv(duplicates_output_path, index=False)
 
 
-# Pivot tables
+# Add the flags and make summary tables
+all_chis_with_phos_with_flags = list(map(add_flags, all_chis_with_phos))
+
+
 def make_pivot(chis):
     return (chis
             .groupby(['is_pho_cell', 'is_pho_cell_filled', 'is_pho_field', 'is_pho_field_filled'], dropna=False)
@@ -142,8 +159,8 @@ def make_pivot(chis):
 
 
 pivots = pd.concat(
-    objs=map(make_pivot, all_chis),
-    keys=[opf.path for opf in opfs],
+    objs=map(make_pivot, all_chis_with_phos),
+    keys=[opf.path for opf in opf_files],
     names=['file_path', 'index']
 )
 
@@ -151,6 +168,3 @@ grand_pivot = (pivots
                .groupby(['is_pho_cell', 'is_pho_cell_filled', 'is_pho_field', 'is_pho_field_filled'], dropna=False)
                .sum()
                .reset_index())
-
-
-
