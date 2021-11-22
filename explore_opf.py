@@ -162,6 +162,17 @@ def add_flags(chis_with_phos):
 all_chis_with_phos_with_flags = add_flags(all_chis_with_phos)
 
 
+# Inconsistent transcriptions
+# These are annotations that have both the pho cell and the pho column filled
+inconsistent_ones = all_chis_with_phos_with_flags[
+    all_chis_with_phos_with_flags.is_pho_cell_filled
+    & all_chis_with_phos_with_flags.is_pho_field_filled]
+
+inconsistent_output_path = Path('repo') / 'reports' / 'inconsistent_ones.csv'
+inconsistent_output_path.parent.mkdir(exist_ok=True)
+inconsistent_ones.to_csv(inconsistent_output_path, index=False)
+
+
 # Make summary tables
 def make_pivot(chis):
     return (chis
