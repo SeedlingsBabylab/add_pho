@@ -93,21 +93,6 @@ orphans.to_csv(orphans_output_path, index=False)
 
 
 # Find all the non-unique ids (not one-to-one matches)
-def find_duplicates(chis: pd.DataFrame):
-    return pd.concat(
-        objs=[chis[(chis.duplicated(subset=['id', 'time_start', 'time_end'], keep=False)
-                    & ~chis.object.isna())],  # don't count empty rows as duplicates of each other
-              chis[(chis.duplicated(subset=['id_pho', 'time_start_pho', 'time_end_pho'], keep=False)
-                    & ~chis.object_pho.isna())]],
-        keys=['CHIs sharing a %pho', '%phos sharing a CHI'],
-    )
-
-
-duplicates = pd.concat(
-    objs=map(find_duplicates, all_chis_with_phos),
-    keys=[opf.path for opf in opf_files],
-    names=['file_path', 'type of duplicate', 'index'])
-
 
 # These column combinations are supposed to be unique
 unique_chi_columns = ['file_path', 'id', 'time_start', 'time_end']
@@ -180,7 +165,7 @@ all_chis_with_phos_with_flags = add_flags(all_chis_with_phos)
 # Make summary tables
 def make_pivot(chis):
     return (chis
-            .groupby(['is_pho_cell', 'is_pho_cell_filled', 'is_pho_field', 'is_pho_field_filled', 'is_orphan'], dropna=False)
+            .groupby(['is_pho_cell', 'is_pho_cell_filled', 'is_pho_field', 'is_pho_field_filled'], dropna=False)
             .size()
             .to_frame('size')
             .reset_index())
