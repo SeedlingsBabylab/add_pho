@@ -167,7 +167,7 @@ class MainTier(object):
 class CHAFile(object):
     def __init__(self, path):
         self.path = path
-        self.partially_parsed = list()
+        self.partially_parsed = None
 
     @property
     def main_tiers(self):
@@ -183,6 +183,8 @@ class CHAFile(object):
         if self.partially_parsed:
             raise ValueError('Already partially parsed')
 
+        partially_parsed = list()
+
         with open(self.path, 'r', encoding='utf-8') as f:
             text = f.readlines()
 
@@ -192,14 +194,16 @@ class CHAFile(object):
 
             # The line before this one was the last one of the tier.
             if main_tier.finished:
-                self.partially_parsed.append(main_tier)
+                partially_parsed.append(main_tier)
                 main_tier = MainTier()
                 # The current line could have started a new tier
                 main_tier.consume(line)
 
             # We are not inside a tier - keep line as is
             if not main_tier.ongoing:
-                self.partially_parsed.append(line)
+                partially_parsed.append(line)
+
+        self.partially_parsed = partially_parsed
 
     @property
     def compiled(self):
