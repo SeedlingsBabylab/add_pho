@@ -2,8 +2,10 @@ class MainTier(object):
     def __init__(self):
         self.ongoing = False
         self.finished = False
-        self.main_tier_lines = list()
+        self.main_tier_lines_unparsed = list()
         self.sub_tiers = list()
+        self.label = None
+        self.contents = None
 
     def consume(self, line):
         """
@@ -16,7 +18,7 @@ class MainTier(object):
                 return
             else:
                 self.ongoing = True
-                self.main_tier_lines.append(line)
+                self.main_tier_lines_unparsed.append(line)
                 return
 
         # If we got here, we are in the middle of building the tier
@@ -26,7 +28,7 @@ class MainTier(object):
             # There shouldn't be lines like this, once we are in the sub-tier part.
             if self.sub_tiers:
                 raise ValueError('A line starts with a tab after the sub-tiers started')
-            self.main_tier_lines.append(line)
+            self.main_tier_lines_unparsed.append(line)
             return
         elif line.startswith('%'):
             self.sub_tiers.append(line)
@@ -41,8 +43,33 @@ class MainTier(object):
             else:
                 raise ValueError('Unexpected line within a tier:\n{}')
 
+    def parse_main(self):
+        """
+
+        :return:
+        """
+        if self.label:
+            raise ValueError('Already parsed the main part')
+
+        # Each line has two parts separated by a tab
+        starts, ends = zip(*[line.split('\t', maxsplit=1) for line in self.main_tier_lines_unparsed])
+        # Only the first line should have non-empty first part
+        assert set(starts[1:]) <= {''}
+        # This part is the tier label.
+        self.label = starts[0]
+        # The second parts of the lines are the content lines
+        self.contents = ends
+
+        # Remove unparsed
+        self.main_tier_lines_unparsed = None
+
     def __str__(self):
-        return ''.join(self.main_tier_lines + self.sub_tiers)
+        if self.main_tier_lines_unparsed:
+            main = ''.join(self.main_tier_lines_unparsed)
+        else:
+            main = '\t'.join([self.label] + list(self.contents))
+        sub = ''.join(self.sub_tiers)
+        return main + sub
 
     def __repr__(self):
         return str(self)
