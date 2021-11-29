@@ -101,6 +101,10 @@ class MainTier(object):
         :param code: CHI, MOT, etc.
         :return: None
         """
+        # Do this just once if any words were found the first time
+        if code in self.words_uttered_by:
+            raise ValueError(f'Words uttered by {code} have already been extracted')
+
         # Don't do anything if the speaker code is not present at all
         if f'_{code}_' not in str(self):
             return
@@ -125,6 +129,9 @@ class MainTier(object):
             self.errors.append(f'Code "{code} found but no annotated words could be identified. Probably a bug.')
 
     def categorize_subtiers(self):
+        if len(self.sub_tiers_by_label) > 0:
+            raise ValueError('Subtiers are already categorized')
+
         for sub_tier in self.sub_tiers:
             self.sub_tiers_by_label[sub_tier.label].append(sub_tier)
 
