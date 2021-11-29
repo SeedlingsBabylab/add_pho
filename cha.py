@@ -1,3 +1,8 @@
+import re
+
+from cha_re import main_tier_content_pattern, annotation as annotation_pattern
+
+
 class MainTier(object):
     def __init__(self):
         self.ongoing = False
@@ -6,6 +11,8 @@ class MainTier(object):
         self.sub_tiers = list()
         self.label = None
         self.contents = None
+        self.words_uttered_by = dict()
+        self.errors = list()
 
     def consume(self, line):
         """
@@ -62,6 +69,35 @@ class MainTier(object):
 
         # Remove unparsed
         self.main_tier_lines_unparsed = None
+
+    def extract_words_by_speaker(self, code):
+        """
+        Finds word uttered by a speaker annotated as code
+        :param code: CHI, MOT, etc.
+        :return: None
+        """
+        # Don't do anything if the speaker code is not present at all
+        if f'_{code}_' not in str(self):
+            return
+
+        for content_line in self.contents:
+            # re will only capture the last match of each group so
+            # we will extract all the annotations in one step and
+            # then find all words and speakers within them
+            parsed = re.match(main_tier_content_pattern, content_line)
+            if not parsed:
+                self.errors.append(f'The following line could not be parsed:\n{content_line}')
+                continue
+
+            annotations = parsed.group('annotations')
+            if any(annotations):
+                words, speakers = zip(*re.findall(annotation_pattern, annotations))
+                speaker_words = [word for word, speaker in zip(words, speakers) if speaker == 'CHI']
+                if speaker_words:
+                    self.words_uttered_by[code] = self.words_uttered_by.get(code, []) + speaker_words
+
+        if code not in self.words_uttered_by:
+            self.errors.append(f'Code "{code} found but no annotated words could be identified. Probably a bug.')
 
     def __str__(self):
         if self.main_tier_lines_unparsed:
