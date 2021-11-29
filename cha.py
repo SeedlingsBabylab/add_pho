@@ -150,6 +150,9 @@ class MainTier(object):
         for sub_tier in self.sub_tiers:
             self.sub_tiers_by_label[sub_tier.label].append(sub_tier)
 
+    def is_speaker_in_annotation(self, speaker_code):
+        return any(f'_{speaker_code}_' in content_line for content_line in self.contents)
+
     def __str__(self):
         if not self.parsed:
             main = ''.join(self.main_tier_lines_unparsed)
@@ -204,6 +207,33 @@ class CHAFile(object):
                 partially_parsed.append(line)
 
         self.partially_parsed = partially_parsed
+
+    def process_for_phonetic_transcription(self, speaker_code):
+        """
+        Parses main tiers, extracts annotated words, categorizes subtiers. Skips the main tiers not mentioning the
+        speaker code
+        :param speaker_code: CHI, MOT, etc.
+        :return: None
+        """
+        if not self.partially_parsed:
+            self.partially_parse()
+
+        for mt in self.main_tiers:
+            # parse
+            if not mt.parsed:
+                mt.parse()
+
+            # skip if the speaker code is not in the annotations
+            if not mt.is_speaker_in_annotation(speaker_code=speaker_code):
+                continue
+
+            # extract annotated words
+            if speaker_code not in mt.words_uttered_by:
+                mt.extract_words_by_speaker(speaker_code)
+
+            # categorize subtiers based on their labels
+            if not mt.sub_tiers_by_label:
+                mt.categorize_subtiers()
 
     @property
     def compiled(self):
