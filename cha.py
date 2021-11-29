@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict
 
-from cha_re import main_tier_content_pattern, annotation as annotation_pattern
+from cha_re import main_tier_content_pattern, annotation as annotation_pattern, ends_with_a_timestamp
 
 
 TRANSCRIPTION_LABEL = '%pho:'
@@ -95,6 +95,21 @@ class MainTier(object):
         self._parse_sub_tiers()
         self.parsed = True
 
+    @property
+    def _contents_with_multiline_annotations_collapsed(self):
+        # Normally, each line ends with a timestamp. If it does not, that means this is a multiline manual
+        # annotation. The regex pattern we use to extract annotated words will only work if such an annotation is
+        # joined into a single line without the tabs and the line endings (the regex could have been modified to
+        # ignore tabs and newlines but we would still need to match against the collapsed line).
+        content_line_ = ''
+        for content_line in self.contents:
+            content_line_ += content_line
+            if re.match(ends_with_a_timestamp, content_line):
+                yield content_line_
+                content_line_ = ''
+            else:
+                content_line_ = content_line_.rstrip('\n') + ' '
+
     def extract_words_by_speaker(self, code):
         """
         Finds word uttered by a speaker annotated as code
@@ -109,7 +124,7 @@ class MainTier(object):
         if f'_{code}_' not in str(self):
             return
 
-        for content_line in self.contents:
+        for content_line in self._contents_with_multiline_annotations_collapsed:
             # re will only capture the last match of each group so
             # we will extract all the annotations in one step and
             # then find all words and speakers within them
