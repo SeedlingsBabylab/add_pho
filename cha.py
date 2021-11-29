@@ -5,13 +5,23 @@ from cha_re import main_tier_content_pattern, annotation as annotation_pattern
 
 class MainTier(object):
     def __init__(self):
+        # A main tier is initially built by feeding it one line from the cha file at a time
         self.ongoing = False
         self.finished = False
+        # The lines are saved as a list
         self.main_tier_lines_unparsed = list()
-        self.sub_tiers = list()
+        self.sub_tiers_lines_unparsed = list()
+
+        # The tier-level parsing breaks the lines into the label and content parts
+        self.parsed = False
         self.label = None
         self.contents = None
+        self.sub_tiers = None  # A list of SubTier objects
+
+        # Parse out the annotated words
         self.words_uttered_by = dict()
+
+        # If something breaks on the way, write it down and continue ahead
         self.errors = list()
 
     def consume(self, line):
@@ -33,12 +43,12 @@ class MainTier(object):
         # These are those multi-line tiers
         if line.startswith('\t'):
             # There shouldn't be lines like this, once we are in the sub-tier part.
-            if self.sub_tiers:
+            if self.sub_tiers_lines_unparsed:
                 raise ValueError('A line starts with a tab after the sub-tiers started')
             self.main_tier_lines_unparsed.append(line)
             return
         elif line.startswith('%'):
-            self.sub_tiers.append(line)
+            self.sub_tiers_lines_unparsed.append(line)
             return
         else:
             # The tier must have ended, the next line must start with one of the following lines
@@ -50,14 +60,11 @@ class MainTier(object):
             else:
                 raise ValueError('Unexpected line within a tier:\n{}')
 
-    def parse_main(self):
+    def _parse_main(self):
         """
 
         :return:
         """
-        if self.label:
-            raise ValueError('Already parsed the main part')
-
         # Each line has two parts separated by a tab
         starts, ends = zip(*[line.split('\t', maxsplit=1) for line in self.main_tier_lines_unparsed])
         # Only the first line should have non-empty first part
@@ -69,6 +76,17 @@ class MainTier(object):
 
         # Remove unparsed
         self.main_tier_lines_unparsed = None
+
+    def _parse_sub_tiers(self):
+        self.sub_tiers = [SubTier.from_line(sub_tier_line) for sub_tier_line in self.sub_tiers_lines_unparsed]
+        self.sub_tiers_lines_unparsed = None
+
+    def parse(self):
+        if self.parsed:
+            raise ValueError('Already parsed')
+        self._parse_main()
+        self._parse_sub_tiers()
+        self.parsed = True
 
     def extract_words_by_speaker(self, code):
         """
@@ -100,11 +118,13 @@ class MainTier(object):
             self.errors.append(f'Code "{code} found but no annotated words could be identified. Probably a bug.')
 
     def __str__(self):
-        if self.main_tier_lines_unparsed:
+        if not self.parsed:
             main = ''.join(self.main_tier_lines_unparsed)
+            sub = ''.join(self.sub_tiers_lines_unparsed)
         else:
             main = '\t'.join([self.label] + list(self.contents))
-        sub = ''.join(self.sub_tiers)
+            sub = ''.join(map(str, self.sub_tiers))
+
         return main + sub
 
     def __repr__(self):
@@ -172,3 +192,17 @@ class CHAFile(object):
         :return: bool
         """
         return open(self.path, 'r').read() == self.compiled
+
+
+class SubTier(object):
+    def __init__(self, label, contents):
+        self.label = label
+        self.contents = contents
+
+    @classmethod
+    def from_line(cls, line):
+        label, contents = line.split('\t')
+        return cls(label=label, contents=contents)
+
+    def __str__(self):
+        return f'{self.label}\t{self.contents}'
