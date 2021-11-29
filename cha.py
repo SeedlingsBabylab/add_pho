@@ -224,3 +224,6 @@ class SubTier(object):
 
     def __str__(self):
         return f'{self.label}\t{self.contents}'
+
+    def __repr__(self):
+        return str(self)
