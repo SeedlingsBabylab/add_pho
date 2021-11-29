@@ -1,6 +1,10 @@
 import re
+from collections import defaultdict
 
 from cha_re import main_tier_content_pattern, annotation as annotation_pattern
+
+
+TRANSCRIPTION_LABEL = '%pho:'
 
 
 class MainTier(object):
@@ -20,6 +24,9 @@ class MainTier(object):
 
         # Parse out the annotated words
         self.words_uttered_by = dict()
+
+        # Categorize the subtiers
+        self.sub_tiers_by_label = defaultdict(list)
 
         # If something breaks on the way, write it down and continue ahead
         self.errors = list()
@@ -116,6 +123,10 @@ class MainTier(object):
 
         if code not in self.words_uttered_by:
             self.errors.append(f'Code "{code} found but no annotated words could be identified. Probably a bug.')
+
+    def categorize_subtiers(self):
+        for sub_tier in self.sub_tiers:
+            self.sub_tiers_by_label[sub_tier.label].append(sub_tier)
 
     def __str__(self):
         if not self.parsed:
