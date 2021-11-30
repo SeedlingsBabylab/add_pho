@@ -1,4 +1,4 @@
-speaker = '(?P<speaker>CHI|MOT|FAT|SIS|AUN|TOY|MCU|BRO|GRA|SI1|MT2|FCO)'
+speaker = '(?P<speaker>CHI|MOT|FAT|SIS|AUN|TOY|MCU|BRO|GRA|SI1|MT2|FCO|BSJ)'
 annotation = fr'(?P<word>[\w+]+) &=[s|d|n|y|i|q]_[n|y|u]_{speaker}_0x[a-z0-9]{{6}}'
 annotations = fr'(?P<annotations>(?:{annotation} +)*)'
 
