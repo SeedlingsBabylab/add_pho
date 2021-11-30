@@ -52,19 +52,21 @@ class MainTier(object):
 
         # If we got here, we are in the middle of building the tier
 
-        # These are those multi-line tiers
+        # These are those multi-line tiers/subtiers
         if line.startswith('\t'):
-            # There shouldn't be lines like this, once we are in the sub-tier part.
+            # If we are in the sub-tier part then line belongs to a subtier
             if self.sub_tiers_lines_unparsed:
-                raise ValueError('A line starts with a tab after the sub-tiers started')
-            self.main_tier_lines_unparsed.append(line)
+                self.sub_tiers_lines_unparsed.append(line)
+            # Otherwise - to the main tier
+            else:
+                self.main_tier_lines_unparsed.append(line)
             return
         elif line.startswith('%'):
             self.sub_tiers_lines_unparsed.append(line)
             return
         else:
             # The tier must have ended, the next line must start with one of the following lines
-            acceptable_prefixes = ('@end', '@bg', '@eg', '*')
+            acceptable_prefixes = ('@end', '@bg', '@eg', '*', '\n')
             line_ = line.lower()
             if any(line_.startswith(prefix) for prefix in acceptable_prefixes):
                 self.finished = True
@@ -297,7 +299,13 @@ class SubTier(object):
 
     @classmethod
     def from_line(cls, line):
-        label, contents = line.split('\t')
+        try:
+            label, contents = line.split('\t', maxsplit=1)
+        # Once in a while there is a subtier that is just '%pho:\n' without any tabs.
+        except ValueError:
+            assert line.endswith(':\n')
+            label = line.split(':')[0] + ':'
+            contents = '\n'
         return cls(label=label, contents=contents)
 
     def __str__(self):
