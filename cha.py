@@ -152,9 +152,7 @@ class MainTier(object):
 
     def extract_phonetic_transcriptions(self):
         transcription_subtiers = self.sub_tiers_by_label[TRANSCRIPTION_LABEL]
-        if len(transcription_subtiers) == 0:
-            self.errors.append('Not transcribed')
-            return
+
         if len(transcription_subtiers) > 1:
             self.errors.append('Multiple transcription subtiers')
             return
