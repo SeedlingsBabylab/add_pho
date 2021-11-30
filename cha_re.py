@@ -1,5 +1,5 @@
-speaker = '(?P<speaker>CHI|MOT|FAT|SIS|AUN|TOY|MCU|BRO|GRA|SI1|MT2|FCO|BSJ)'
-annotation = fr'(?P<word>[\w+]+) &=[s|d|n|y|i|q]_[n|y|u]_{speaker}_0x[a-z0-9]{{6}}'
+speaker = '(?P<speaker>CHI|MOT|FAT|SIS|AUN|TOY|MCU|BRO|GRA|SI1|MT2|FCO|BSJ|GRM)'
+annotation = fr'(?P<word>[\w+]+) &=[s|d|n|y|i|q|r]_[n|y|u]_{speaker}_0x[a-z0-9]{{6}}'
 annotations = fr'(?P<annotations>(?:{annotation} +)*)'
 
 lena_annotation = r'(?:0|&=(?:w\d+(?:_\d+)?|vocalization|crying|vfx))'
