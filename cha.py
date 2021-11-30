@@ -1,7 +1,8 @@
 import re
 from collections import defaultdict
 
-from cha_re import main_tier_content_pattern, annotation as annotation_pattern, ends_with_a_timestamp
+from cha_re import main_tier_content_pattern, annotation as annotation_pattern, ends_with_a_timestamp,\
+    transcription_pattern
 
 
 TRANSCRIPTION_LABEL = '%pho:'
@@ -27,6 +28,10 @@ class MainTier(object):
 
         # Categorize the subtiers
         self.sub_tiers_by_label = defaultdict(list)
+
+        # Transcriptions
+        self.transcriptions = None
+        self.transcription_kinds = None
 
         # If something breaks on the way, write it down and continue ahead
         self.errors = list()
@@ -143,6 +148,27 @@ class MainTier(object):
         if code not in self.words_uttered_by:
             self.errors.append(f'Code "{code} found but no annotated words could be identified. Probably a bug.')
 
+    def extract_phonetic_transcriptions(self):
+        transcription_subtiers = self.sub_tiers_by_label[TRANSCRIPTION_LABEL]
+        if len(transcription_subtiers) == 0:
+            self.errors.append('Not transcribed')
+            return
+        if len(transcription_subtiers) > 1:
+            self.errors.append('Multiple transcription subtiers')
+            return
+
+        contents = self.sub_tiers_by_label[TRANSCRIPTION_LABEL][0].contents
+        self.transcriptions = contents.split()
+        self.transcription_kinds = [
+            'ipa' if re.match(transcription_pattern, transcription) else
+            'not transcribed' if transcription == '###' else
+            'error'
+            for transcription in self.transcriptions]
+
+        for (transcription, kind) in zip(self.transcriptions, self.transcription_kinds):
+            if kind == 'error':
+                self.errors.append(f'Unexpected transcription: {transcription}')
+
     def categorize_subtiers(self):
         if len(self.sub_tiers_by_label) > 0:
             raise ValueError('Subtiers are already categorized')
@@ -210,8 +236,8 @@ class CHAFile(object):
 
     def process_for_phonetic_transcription(self, speaker_code):
         """
-        Parses main tiers, extracts annotated words, categorizes subtiers. Skips the main tiers not mentioning the
-        speaker code
+        Parses main tiers, extracts annotated words, categorizes subtiers, extracts transcriptions.
+        Skips the main tiers not mentioning the speaker code
         :param speaker_code: CHI, MOT, etc.
         :return: None
         """
@@ -234,6 +260,10 @@ class CHAFile(object):
             # categorize subtiers based on their labels
             if not mt.sub_tiers_by_label:
                 mt.categorize_subtiers()
+
+            # Extract transcriptions
+            if not mt.transcriptions:
+                mt.extract_phonetic_transcriptions()
 
     @property
     def compiled(self):

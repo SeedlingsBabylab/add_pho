@@ -11,3 +11,5 @@ other = fr'(?:{lena_annotation} +)?{maybe_zero}{maybe_dot}{timestamp}'
 main_tier_content_pattern = fr'{annotations}{other}$'
 # used to identify main tier lines manually split over multiple lines
 ends_with_a_timestamp = fr'^.*{timestamp}$'
+
+transcription_pattern = r"^[a-zA-Z?&'36:.+]+$"
