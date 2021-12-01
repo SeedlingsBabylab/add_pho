@@ -298,22 +298,11 @@ class SubTier(object):
 
     @classmethod
     def from_line(cls, line):
-        try:
-            label, contents = line.split('\t', maxsplit=1)
-        # Once in a while there is a subtier that is just '%pho:\n' without any tabs.
-        except ValueError:
-            assert line.endswith(':\n')
-            label = line.split(':')[0] + ':'
-            contents = '\n'
+        label, contents = line.split('\t', maxsplit=1)
         return cls(label=label, contents=contents)
 
     def __str__(self):
-        # In the rare case of a '%pho:\n' line, there is no \t after the subtier label
-        if self.label == '%pho:' and self.contents == '\n':
-            separator = ''
-        else:
-            separator = '\t'
-        return f'{self.label}{separator}{self.contents}'
+        return f'{self.label}\t{self.contents}'
 
     def __repr__(self):
         return str(self)
