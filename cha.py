@@ -143,7 +143,7 @@ class MainTier(object):
             annotations = parsed.group('annotations')
             if any(annotations):
                 words, speakers = zip(*re.findall(annotation_pattern, annotations))
-                speaker_words = [word for word, speaker in zip(words, speakers) if speaker == 'CHI']
+                speaker_words = [word for word, speaker in zip(words, speakers) if speaker == code]
                 if speaker_words:
                     self.words_uttered_by[code] = self.words_uttered_by.get(code, []) + speaker_words
 
