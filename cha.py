@@ -308,7 +308,12 @@ class SubTier(object):
         return cls(label=label, contents=contents)
 
     def __str__(self):
-        return f'{self.label}\t{self.contents}'
+        # In the rare case of a '%pho:\n' line, there is no \t after the subtier label
+        if self.label == '%pho:' and self.contents == '\n':
+            separator = ''
+        else:
+            separator = '\t'
+        return f'{self.label}{separator}{self.contents}'
 
     def __repr__(self):
         return str(self)
