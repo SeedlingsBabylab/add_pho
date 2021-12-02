@@ -180,6 +180,54 @@ class MainTier(object):
     def is_speaker_in_annotation(self, speaker_code):
         return any(f'_{speaker_code}_' in content_line for content_line in self.contents)
 
+    def update_pho(self, speaker_code):
+        """
+        Checks the pho subtier against the annotated words uttered by speaker_code
+        :param speaker_code: CHI, MOT, etc.
+        :return: str - result of the operation - what's been updated/added or an error message
+        """
+        if not self.is_speaker_in_annotation(speaker_code):
+            return f'error: {speaker_code} not in annotation'
+
+        # TODO: What if the words have not been extracted yet?
+        words = self.words_uttered_by[speaker_code]
+        n_words = len(words)
+        if n_words == 0:
+            return 'error: no words were extracted'
+
+        # TODO: What if the subtiers have not been categorized yet?
+        pho_subtiers = self.sub_tiers_by_label[TRANSCRIPTION_LABEL]
+        if len(pho_subtiers) == 0:
+            pho_subtier = SubTier(label=TRANSCRIPTION_LABEL, contents=' '.join(['###'] * n_words))
+            # TODO: uncomment once tested
+            # self.sub_tiers = [pho_subtier] + self.sub_tiers
+            return 'pho subtier added'
+
+        [pho_subtier] = pho_subtiers
+        m_transcriptions = len(self.transcriptions)
+        # Above, we counted '###' as well as actual transcriptions
+        m_transcribed = m_transcriptions - self.transcriptions.count('###')
+
+        if m_transcribed == 0:
+            # TODO: uncomment once tested
+            # pho_subtier.contents = ' '.join(['###'] * n_words)
+            return "###'s added, needs transcription"
+
+        if m_transcriptions > n_words:
+            return 'error: more transcriptions than there are words'
+
+        if m_transcriptions < n_words:
+            # If we got here, there is at least one actual transcription
+            return 'error: fewer transcriptions than there are words, order unknown, sort manually'
+
+        # If we got here, m_transcriptions == n_words
+
+        if m_transcribed < n_words:
+            return 'needs some transcription'
+
+        if m_transcribed == n_words:
+            return 'all transcribed'
+
     def __str__(self):
         if not self.parsed:
             main = ''.join(self.main_tier_lines_unparsed)
