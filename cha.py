@@ -211,7 +211,12 @@ class MainTier(object):
         if m_transcribed == 0:
             # TODO: uncomment once tested
             # pho_subtier.contents = ' '.join(['###'] * n_words)
-            return "###'s added, needs transcription"
+            if m_transcriptions < n_words:
+                return "###'s added, needs transcription"
+            elif m_transcriptions > n_words:
+                return "###'s removed, needs transcription"
+            elif m_transcriptions == n_words:
+                return "needs transcription"
 
         if m_transcriptions > n_words:
             return 'error: more transcriptions than there are words'
