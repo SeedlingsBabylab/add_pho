@@ -2,6 +2,8 @@
 # coding: utf-8
 
 # In[0]
+from contextlib import redirect_stdout
+
 from IPython import get_ipython
 
 get_ipython().run_line_magic('load_ext', 'autoreload')
@@ -84,12 +86,18 @@ for status, mts in main_tiers.items():
 # In[55]:
 
 
-def print_tiers_with_status(status):
-    for cf, mt in main_tiers[status]:
+def print_tiers_with_status(str_status):
+    for cf, mt in main_tiers[str_status]:
         print(cf.path)
         print(mt)
         print('Annotated words: ', *mt.words_uttered_by[SPEAKER_CODE])
         print('\n')
+
+
+def print_tiers_with_status_to_file(str_status, path):
+    with open(path, 'w') as f:
+        with redirect_stdout(f):
+            print_tiers_with_status(str_status)
 
 
 # In[61]:
@@ -107,7 +115,7 @@ print_tiers_with_status('error: fewer transcriptions than there are words, order
 # In[59]:
 
 
-print_tiers_with_status('pho subtier added')
+print_tiers_with_status('###\'s added, needs transcription')
 
 
 # In[63]:
