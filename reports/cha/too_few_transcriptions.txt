@@ -1,0 +1,109 @@
+01_17_sparse_code.cha
+*CHN:	ear &=n_y_CHI_0x925a6e &=vocalization 4991030_4992040
+	0 4992040_4992460
+	&=vocalization 4992460_4992840
+	0 4992840_4993550
+	ear &=n_y_CHI_0x900448  &=vocalization . 4993550_4994410
+%pho:	I6r
+%xcom:	Child multi-word utterance
+%com:	|RC|170|92|0|XIOCC|NT|FI|
+%xdb:	average_dB="-19.78" peak_dB="-12.24"
+
+Annotated words:  ear ear
+
+
+01_17_sparse_code.cha
+*OLN:	penguin &=n_y_CHI_0x352e93 penguin &=n_y_CHI_0x366d19 0 . 11991700_12010790
+%pho:	eNwAn
+%xcom:	child phonology for penguin
+%xcom:	subregion 2 of 5  (ranked 3 of 5)  ends at 12000000 -- previous timestamp adjusted: was 12010790
+%xdb:	average_dB="-23.66" peak_dB="-13.55"
+
+Annotated words:  penguin penguin
+
+
+01_17_sparse_code.cha
+*OLN:	packet &=d_n_CHI_0x793cc3  packet &=d_y_CHI_0x80ce94 packet
+	&=d_n_CHI_0x6b77be vegetables &=n_n_FAT_0xc12e2d  0 . 13226900_13259730
+%pho:	b&gE?
+%xcom:	I want another packet (repeated 3 times)
+%xcom:	Child multi-word utterance
+%xdb:	average_dB="-22.02" peak_dB="-13.58"
+
+Annotated words:  packet packet packet
+
+
+02_17_sparse_code.cha
+*CXN:	shoe &=n_y_CHI_0x9b28e4 shoe &=n_y_CHI_0xf064ad 0 . 1618730_1620360
+%pho:	ru
+%com:	|BC|58|22|0|XIC|NT|FI|
+%xdb:	average_dB="-26.11" peak_dB="-15.84"
+
+Annotated words:  shoe shoe
+
+
+44_17_sparse_code.cha
+*CHN:	baby &=d_y_CHI_0x1540d9 &=vocalization 4546430_4547390
+	0  4547390_4548130
+	baby &=q_y_SI1_0xe0eafb baby &=d_y_CHI_0x333942 &=vocalization . 4548130_4551020
+%com:	I'm a baby
+%xcom:	child multi-word utterance
+%pho:	bebi
+%xcom:	I'm a baby
+%xcom:	child multi-word utterance
+%xcom:	|RC|113|6|0|XIC|NT|FH|
+%xdb:	average_dB="-18.23" peak_dB="-7.16"
+
+Annotated words:  baby baby
+
+
+46_17_sparse_code.cha
+*CHN:	dog &=n_n_CHI_0x794186 &=vocalization 10170030_10170280
+	0  10170280_10170970
+	dog &=n_n_CHI_0x9d5fe4 &=vocalization  10170970_10171220
+	0 . 10171220_10171310
+%pho:	dada
+%xcom:	child phonology for dog
+%com:	|RC|260|70|1|XIC|TIFI|FI|
+%xdb:	average_dB="-17.01" peak_dB="-7.40"
+
+Annotated words:  dog dog
+
+
+08_17_sparse_code.cha
+*CHN:	0 21087420_21087520
+	mail &=n_y_CHI_0x36d10f &=vocalization 21087520_21088680
+	0  21088680_21089120
+	mail &=n_y_CHI_0x772e84 &=vocalization . 21089120_21090420
+%pho:	mi:U
+%xpho:	mi:U
+%com:	|RC|465|430|1|CIC|TIFI|FH|
+%xdb:	average_dB="-17.90" peak_dB="-9.45"
+
+Annotated words:  mail mail
+
+
+20_17_sparse_code.cha
+*CHN:	doggy &=n_y_CHI_0xe6bcbf &=vocalization 6812510_6813800
+	0  6813800_6814540
+	doggy &=n_y_CHI_0x04be7b &=vocalization . 6814540_6815320
+%pho:	dA:ji.
+%xpho:	daji:
+%com:	|RC|243|204|2|AICM|TIMR|FI|
+%xdb:	average_dB="-13.92" peak_dB="-6.15"
+
+Annotated words:  doggy doggy
+
+
+20_17_sparse_code.cha
+*CHN:	doggy &=n_n_CHI_0xdc02c4 &=vocalization 14266480_14267430
+	0  14267430_14268110
+	doggy &=n_n_CHI_0x804018 &=vocalization . 14268110_14269060
+%pho:	jOji
+%xpho:	6di
+%com:	|RC|527|396|0|CM|NT|FH|
+%xdb:	average_dB="-15.14" peak_dB="-8.04"
+
+Annotated words:  doggy doggy
+
+

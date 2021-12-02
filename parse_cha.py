@@ -88,13 +88,14 @@ for status, mts in main_tiers.items():
 
 def print_tiers_with_status(str_status):
     for cf, mt in main_tiers[str_status]:
-        print(cf.path)
+        print(cf.path.name)
         print(mt)
         print('Annotated words: ', *mt.words_uttered_by[SPEAKER_CODE])
         print('\n')
 
 
 def print_tiers_with_status_to_file(str_status, path):
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
     with open(path, 'w') as f:
         with redirect_stdout(f):
             print_tiers_with_status(str_status)
@@ -103,13 +104,17 @@ def print_tiers_with_status_to_file(str_status, path):
 # In[61]:
 
 
-print_tiers_with_status('error: more transcriptions than there are words')
+print_tiers_with_status_to_file(
+    str_status='error: more transcriptions than there are words',
+    path='reports/cha/too_many_transcriptions.txt')
 
 
 # In[58]:
 
 
-print_tiers_with_status('error: fewer transcriptions than there are words, order unknown, sort manually')
+print_tiers_with_status_to_file(
+    str_status='error: fewer transcriptions than there are words, order unknown, sort manually',
+    path='reports/cha/too_few_transcriptions.txt')
 
 
 # In[59]:

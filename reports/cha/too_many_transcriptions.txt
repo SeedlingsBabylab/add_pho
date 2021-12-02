@@ -1,0 +1,26 @@
+32_17_sparse_code.cha
+*CHN:	boo &=n_n_CHI_0xef9996 &=vocalization . 31825110_31825720
+%pho:	NOT WORD
+%xcom:	child phonology for booby
+%com:	|EC|617|126|1|CIC|NT|FH|
+%xdb:	average_dB="-23.34" peak_dB="-21.59"
+
+Annotated words:  boo
+
+
+28_17_sparse_code.cha
+*OLN:	oranges &=d_y_MOT_0x1d8f75 apples &=d_n_MOT_0x4945d6 oranges &=n_y_MOT_0x7adcca apple &=n_n_CHI_0xf11537 apple &=n_n_CHI_0x2244a5 apple &=n_y_CHI_0xdbccd3 apple &=n_y_CHI_0xbf3163 apples &=q_y_MOT_0x551715  apple &=n_y_CHI_0x433a8c apple &=n_y_CHI_0x95a1df applesauce &=d_n_MOT_0xba5b85 apple &=n_y_CHI_0x007de7 apples &=d_y_MOT_0xbd99e7 0 . 38377600_38426620
+%pho:	&bu &bu     h&bu     &bu &bu      &puO     &pu      &bu
+%xdb:	average_dB="-25.58" peak_dB="-9.00"
+
+Annotated words:  apple apple apple apple apple apple apple
+
+
+28_17_sparse_code.cha
+*OLN:	apple &=n_y_CHI_0x5f42b9 apple &=n_y_CHI_0xb1a1bb apple &=n_y_MOT_0x53803f apple &=n_y_MOT_0x1a2915 apple &=n_y_CHI_0xd145c4 apple &=n_y_MOT_0x0c8b04  0 . 38478820_38489640
+%pho:	Epu   &bu   &bu   &bu
+%xdb:	average_dB="-24.03" peak_dB="-10.41"
+
+Annotated words:  apple apple apple
+
+
