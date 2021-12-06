@@ -43,22 +43,9 @@ for i, cha_file in enumerate(cha_files):
     cha_file.process_for_phonetic_transcription(SPEAKER_CODE)
 
 
-# # Step 1
+# # Step 1, check for errors
 
-# In[16]:
-
-
-with_errors = list()
-for cf in cha_files:
-    for mt in cf.main_tiers:
-        if mt.errors:
-            with_errors.append((cf, mt))
-            print(cf.path)
-            print(mt)
-            for error in mt.errors:
-                print(error)
-            print()
-
+assert not any(mt.errors for cf in cha_files for mt in cf.main_tiers)
 
 # # Step 2
 # 
