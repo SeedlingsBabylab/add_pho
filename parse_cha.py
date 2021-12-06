@@ -12,10 +12,9 @@ get_ipython().run_line_magic('aimport', 'cha')
 get_ipython().run_line_magic('aimport', 'cha_re')
 from cha import CHAFile
 
-
-# In[1]:
-
+# In[]
 from pathlib import Path
+
 
 
 # In[2]:
@@ -26,13 +25,18 @@ SPEAKER_CODE = 'CHI'
 
 # In[3]:
 
+seedlings_path = Path('/Volumes/pn-opus/Seedlings')
+assert seedlings_path.exists()
 
-cha_repo = Path.home() / 'blab' / 'annotated_cha'
-cha_paths = list(cha_repo.glob('annotated_cha/*.cha'))
+cha_file_path_list = seedlings_path.joinpath('Scripts_and_Apps/Github/seedlings/path_files/cha_sparse_code_paths.txt')
+assert cha_file_path_list.exists()
+
+with cha_file_path_list.open('r', encoding='utf-8') as f:
+    cha_paths = list(map(lambda line: Path(line.rstrip()), f))
 
 
+# # Load an parse
 # In[4]:
-
 
 cha_files = [CHAFile(cha_path) for cha_path in cha_paths]
 
@@ -44,6 +48,8 @@ for i, cha_file in enumerate(cha_files):
 
 
 # # Step 1, check for errors
+
+# In[]:
 
 assert not any(mt.errors for cf in cha_files for mt in cf.main_tiers)
 
