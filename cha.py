@@ -343,6 +343,20 @@ class CHAFile(object):
         """
         return open(self.path, 'r').read() == self.compiled
 
+    def write(self, path=None, overwrite_original=False):
+        if not path and not overwrite_original:
+            raise ValueError('You haven\'t specified the path to write the file to. If you want to overwrite the '
+                             'original file, set overwrite_original to True')
+
+        if path and overwrite_original:
+            raise ValueError('You\'ve specified the path and set overwrite_original to True - you can only do one of '
+                             'those')
+
+        path = path or self.path
+
+        with open(path, 'w') as f:
+            f.write(self.compiled)
+
 
 class SubTier(object):
     def __init__(self, label, contents):
