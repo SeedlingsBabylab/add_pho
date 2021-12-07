@@ -77,9 +77,7 @@ for status, mts in main_tiers.items():
     print(status, len(mts))
 
 # After manual edits, the only error should be "error: CHI not in annotation"
-assert not any(status.startswith('error') and status != 'error: CHI not in annotation'
-               for status
-               in main_tiers)
+assert not any(status.startswith('error') for status in main_tiers)
 
 
 for cf in cha_files:

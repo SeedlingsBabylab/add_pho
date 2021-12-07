@@ -187,7 +187,7 @@ class MainTier(object):
         :return: str - result of the operation - what's been updated/added or an error message
         """
         if not self.is_speaker_in_annotation(speaker_code):
-            return f'error: {speaker_code} not in annotation'
+            return f'{speaker_code} not in annotation'
 
         # TODO: What if the words have not been extracted yet?
         words = self.words_uttered_by[speaker_code]
