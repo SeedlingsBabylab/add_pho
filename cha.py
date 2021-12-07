@@ -198,9 +198,9 @@ class MainTier(object):
         # TODO: What if the subtiers have not been categorized yet?
         pho_subtiers = self.sub_tiers_by_label[TRANSCRIPTION_LABEL]
         if len(pho_subtiers) == 0:
-            pho_subtier = SubTier(label=TRANSCRIPTION_LABEL, contents=' '.join(['###'] * n_words))
-            # TODO: uncomment once tested
-            # self.sub_tiers = [pho_subtier] + self.sub_tiers
+            pho_subtier = SubTier(label=TRANSCRIPTION_LABEL, contents=(' '.join(['###'] * n_words) + '\n'))
+            self.sub_tiers = [pho_subtier] + self.sub_tiers
+            self.sub_tiers_by_label[TRANSCRIPTION_LABEL].append(pho_subtier)
             return 'pho subtier added'
 
         [pho_subtier] = pho_subtiers
@@ -209,8 +209,8 @@ class MainTier(object):
         m_transcribed = m_transcriptions - self.transcriptions.count('###')
 
         if m_transcribed == 0:
-            # TODO: uncomment once tested
-            # pho_subtier.contents = ' '.join(['###'] * n_words)
+            pho_subtier.contents = ' '.join(['###'] * n_words) + '\n'
+            self.extract_phonetic_transcriptions()
             if m_transcriptions < n_words:
                 return "###'s added, needs transcription"
             elif m_transcriptions > n_words:

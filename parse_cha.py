@@ -44,11 +44,15 @@ first_lines_to_skip = (
 
 assert not any(mt.errors and mt.contents[0] not in first_lines_to_skip for cf in cha_files for mt in cf.main_tiers)
 
+# In[]
+# # Check that the files can be reconstructed without changes before introducing any
+for cf in cha_files:
+    if not cf.no_changes():
+        raise ValueError
+
 
 # In[]
-# # Add
-# Check for transcription errors (too few, too many, etc.)
-
+# # Add pho tier or '###' and check for transcription errors (too few, too many, etc.)
 main_tiers = defaultdict(list)
 for cf in cha_files:
     for mt in cf.main_tiers:
@@ -59,8 +63,10 @@ for cf in cha_files:
 
 assert not any(status.startswith('error') for status in main_tiers)
 
-
+# In[]
+# # Write the results
+test_dir = Path.home() / 'blab' / 'annotated_cha' / 'annotated_cha'
+assert test_dir.exists()
 for cf in cha_files:
-    if not cf.no_changes():
-        raise ValueError
-
+    output_path = test_dir / cf.path.name
+    cf.write(path=output_path)
