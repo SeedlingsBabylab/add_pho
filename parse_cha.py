@@ -49,9 +49,13 @@ for i, cha_file in enumerate(cha_files):
 
 # # Step 1, check for errors
 
-# In[]:
+# Three main tiers have been updated and now have annotid missing. We will skip them here.
+first_lines_to_skip = (
+    'penguin &=n_y_CHI_0x352e93 penguin &=n_y_CHI_0x366d19 penguin\n',
+    'oranges &=d_y_MOT_0x1d8f75 apples &=d_n_MOT_0x4945d6 oranges\n',
+    'apple &=n_y_CHI_0x5f42b9 apple &=n_y_CHI_0xb1a1bb apple &=n_y_CHI\n')
 
-assert not any(mt.errors for cf in cha_files for mt in cf.main_tiers)
+assert not any(mt.errors and mt.contents[0] not in first_lines_to_skip for cf in cha_files for mt in cf.main_tiers)
 
 # # Step 2
 # 
@@ -64,68 +68,21 @@ from collections import defaultdict
 main_tiers = defaultdict(list)
 for cf in cha_files:
     for mt in cf.main_tiers:
-        if mt.contents == ('bug &=n_n_CHI_0x227315 &CV &=w9_66 . \x151057910_1060130\x15\n',):
+        # Skip main tiers with a missing annotid
+        if mt.contents[0] in first_lines_to_skip:
             continue
         main_tiers[mt.update_pho(SPEAKER_CODE)].append((cf, mt))
-
-
-# In[47]:
-
 
 for status, mts in main_tiers.items():
     print(status, len(mts))
 
+# After manual edits, the only error should be "error: CHI not in annotation"
+assert not any(status.startswith('error') and status != 'error: CHI not in annotation'
+               for status
+               in main_tiers)
 
-# In[55]:
-
-
-def print_tiers_with_status(str_status):
-    for cf, mt in main_tiers[str_status]:
-        print(cf.path.name)
-        print(mt)
-        print('Annotated words: ', *mt.words_uttered_by[SPEAKER_CODE])
-        print('\n')
-
-
-def print_tiers_with_status_to_file(str_status, path):
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
-    with open(path, 'w') as f:
-        with redirect_stdout(f):
-            print_tiers_with_status(str_status)
-
-
-# In[61]:
-
-
-print_tiers_with_status_to_file(
-    str_status='error: more transcriptions than there are words',
-    path='reports/cha/too_many_transcriptions.txt')
-
-
-# In[58]:
-
-
-print_tiers_with_status_to_file(
-    str_status='error: fewer transcriptions than there are words, order unknown, sort manually',
-    path='reports/cha/too_few_transcriptions.txt')
-
-
-# In[59]:
-
-
-print_tiers_with_status('###\'s added, needs transcription')
-
-
-# In[63]:
-# Check that the file can be compiled back form the parsed version.
 
 for cf in cha_files:
     if not cf.no_changes():
         raise ValueError
 
-
-# n words, m transcriptions
-# - no pho - add pho with n '###'
-# - m == n - nevermind
-# - m < n  - add (n-m) '###', extract to a separate list for sorting, unless all '###'
-# - m > n  - another list
