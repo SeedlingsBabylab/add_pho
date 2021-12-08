@@ -25,6 +25,7 @@ class MainTier(object):
 
         # Parse out the annotated words
         self.words_uttered_by = dict()
+        self.annotid_of_words_uttered_by = dict()
 
         # Categorize the subtiers
         self.sub_tiers_by_label = defaultdict(list)
@@ -142,10 +143,15 @@ class MainTier(object):
 
             annotations = parsed.group('annotations')
             if any(annotations):
-                words, speakers = zip(*re.findall(annotation_pattern, annotations))
-                speaker_words = [word for word, speaker in zip(words, speakers) if speaker == code]
-                if speaker_words:
-                    self.words_uttered_by[code] = self.words_uttered_by.get(code, []) + speaker_words
+                words, speakers, annotids = zip(*re.findall(annotation_pattern, annotations))
+                word_annotid_pairs = [(word, annotid)
+                                      for word, speaker, annotid in zip(words, speakers, annotids)
+                                      if speaker == code]
+                if word_annotid_pairs:
+                    speaker_words, speaker_annotids = zip(*word_annotid_pairs)
+                    self.words_uttered_by[code] = self.words_uttered_by.get(code, []) + list(speaker_words)
+                    self.annotid_of_words_uttered_by[code] = (self.annotid_of_words_uttered_by.get(code, []) +
+                                                              list(speaker_annotids))
 
         if code not in self.words_uttered_by:
             self.errors.append(f'Code "{code} found but no annotated words could be identified. Probably a bug.')
