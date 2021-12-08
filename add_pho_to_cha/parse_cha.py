@@ -1,8 +1,7 @@
 from pathlib import Path
 from collections import defaultdict
 
-from cha import CHAFile, TRANSCRIPTION_LABEL
-
+from add_pho_to_cha.cha import CHAFile
 
 SPEAKER_CODE = 'CHI'
 
