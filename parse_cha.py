@@ -1,12 +1,7 @@
 from pathlib import Path
 from collections import defaultdict
 
-from IPython import get_ipython
-
-get_ipython().run_line_magic('load_ext', 'autoreload')
-get_ipython().run_line_magic('autoreload', '1')
-get_ipython().run_line_magic('aimport', 'cha')
-from cha import CHAFile
+from cha import CHAFile, TRANSCRIPTION_LABEL
 
 
 SPEAKER_CODE = 'CHI'
@@ -47,8 +42,7 @@ assert not any(mt.errors and mt.contents[0] not in first_lines_to_skip for cf in
 # In[]
 # # Check that the files can be reconstructed without changes before introducing any
 for cf in cha_files:
-    if not cf.no_changes():
-        raise ValueError
+    assert cf.no_changes()
 
 
 # In[]
@@ -64,9 +58,36 @@ for cf in cha_files:
 assert not any(status.startswith('error') for status in main_tiers)
 
 # In[]
-# # Write the results
-test_dir = Path.home() / 'blab' / 'annotated_cha' / 'annotated_cha'
-assert test_dir.exists()
+# # No new changes
+# This script has already been run, no new changes should have been introduced
 for cf in cha_files:
-    output_path = test_dir / cf.path.name
-    cf.write(path=output_path)
+    assert cf.no_changes(), 'We\'ve already edited/added pho subtiers so no changes should have been introduced'
+
+# In[]
+# # Write the results
+# for cf in cha_files:
+#     cf.write(overwrite_original=True)
+
+
+# In[]
+# # Output a list of words that need transcription
+to_transcribe = list()
+for cf in cha_files:
+    for mt in cf.main_tiers:
+        if SPEAKER_CODE in mt.words_uttered_by:
+            for word, annotid, transcription in zip(mt.words_uttered_by[SPEAKER_CODE],
+                                                    mt.annotid_of_words_uttered_by[SPEAKER_CODE],
+                                                    mt.transcriptions):
+                if transcription == '###':
+                    to_transcribe.append((cf.path.absolute(),
+                                          word,
+                                          annotid,
+                                          transcription))
+
+to_transcribe_path = Path('reports/cha/to_transcribe.csv')
+to_transcribe_path.parent.mkdir(parents=True, exist_ok=True)
+import pandas as pd
+to_transribe_df = pd.DataFrame(
+    columns=('file_path', 'word', 'annotid', 'transcription'),
+    data=to_transcribe)
+to_transribe_df.to_csv('reports/cha/to_transcribe.csv', index=False)
