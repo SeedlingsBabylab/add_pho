@@ -17,9 +17,8 @@ class OPFFile(object):
 
             # Annotations
             with zpf.open('db', 'r') as f:
-                db = f.read().splitlines()
-            # zpf.open read file in binary mode
-            db = [line.decode('utf-8') for line in db]
+                # zpf.open reads files in binary mode
+                db = f.read().decode('utf-8')
 
             # Other components
             other_files = {name: zpf.open(name, 'r').read()
