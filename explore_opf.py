@@ -3,7 +3,6 @@ from pathlib import Path
 import pandas as pd
 
 from opf import OPFFile, OPFDataFrame
-from seedlings import subject_files_dir, find_matching
 
 
 PHO_PREFIX = r'^%pho:?(?:&|\s+)'
@@ -62,8 +61,15 @@ def collect_all_chi(opf: OPFDataFrame):
 # # Main
 
 # locate all the opf files
-opf_path_pattern = r'\d{2}/\d{2}_\d{2}/Home_Visit/Coding/Video_Annotation/\d{2}_\d{2}_sparse_code.opf'
-opf_paths = find_matching(list_of_roots=[subject_files_dir], pattern=opf_path_pattern)
+seedlings_path = Path('/Volumes/pn-opus/Seedlings')
+assert seedlings_path.exists()
+
+opf_file_path_list = seedlings_path.joinpath('Scripts_and_Apps/Github/seedlings/path_files/opf_paths.txt')
+assert opf_file_path_list.exists()
+
+with opf_file_path_list.open('r', encoding='utf-8') as f:
+    opf_paths = [Path(path.rstrip()) for path in f]
+
 
 # Read and convert to dataframes
 opf_files = list(map(OPFFile, opf_paths))
