@@ -83,10 +83,12 @@ for cf in cha_files:
                                           annotid,
                                           transcription))
 
-to_transcribe_path = Path('reports/cha/to_transcribe.csv')
-to_transcribe_path.parent.mkdir(parents=True, exist_ok=True)
-import pandas as pd
-to_transribe_df = pd.DataFrame(
-    columns=('file_path', 'word', 'annotid', 'transcription'),
-    data=to_transcribe)
-to_transribe_df.to_csv('reports/cha/to_transcribe.csv', index=False)
+if to_transcribe:
+    to_transcribe_path = Path('to_transcribe.csv')
+    to_transcribe_path.parent.mkdir(parents=True, exist_ok=True)
+    import pandas as pd
+    to_transribe_df = pd.DataFrame(
+        columns=('file_path', 'word', 'annotid', 'transcription'),
+        data=to_transcribe)
+    to_transribe_df.to_csv('to_transcribe.csv', index=False)
+    print(f"Words that require transcribing written to {to_transcribe_path.absolute()}")

@@ -1,46 +1,21 @@
-## batch.sh
+This code adds/edits placeholders for phonetic transcriptions to annotations (CHA/OPF).
+The code intentionally breaks if there are any formatting or other inconsistencies.
+If there are any errors, run in interactive mode to investigate.
 
-By supplying a path file to the batch shell script, you can modify 
-opf files in bulk. The script is run like this:
+# CHA files
 
-./batch.sh paths_to_opf_files.txt
+Run 
+```ipython -i add_pho_to_cha/update_pho_in_cha.py```
 
-The errors, if there are any, will be printed to stdout.
+It will create/update `add_pho_to_cha/to_transcribe.csv`.
 
-**NOTE:** The batch script uses gnu parallel to speed things up. It
-currently does not support sequential, so right your own shell script
-for that. 
+The cha-editing part has already been done and is now commented out.
+If any new changes are necessary, the script will throw an assertion error since there should be no new changes.
+If this happens, and you want the script to update the cha files accordingly:
+- run the updating code by hand (see `# Write the results` in the script),
+- backup the updated cha files,
+- re-run the script - there should be no errors, there might be new words to transcribe.
 
+# Previous version of the code
 
-### add_pho2cha.py
-
-usage: add_pho2cha.py [-h] [--output_path OUTPUT_PATH] input_file
-
-Add pho tiers for each child utterance.
-
-positional arguments:
-  input_file            The cha/opf file to which pho lines will be added.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --output_path OUTPUT_PATH
-                        Path of the output file, which is the updated cha
-                        file, with pho lines added.
-
-### add_pho2opf.py
-
-usage: add_pho2opf.py [-h] [-o OUTPUT_PATH] input_file
-
-Add pho cells to the opf file. The script moves "old" style pho annotations
-with a pho cell. If the script was run on a given file before, it will not run
-again.
-
-positional arguments:
-  input_file            The path to the input opf file.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -o OUTPUT_PATH, --output-path OUTPUT_PATH
-                        Path of the output file. If no output is specified,
-                        the input opf path is used (so the input file is
-                        modified)
+Previous version can be found under `archive` together with the corresponding README.
