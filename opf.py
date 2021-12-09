@@ -1,7 +1,8 @@
 import re
 import os
-from zipfile import ZipFile
+from zipfile import ZipFile, ZIP_DEFLATED
 import tempfile
+from pathlib import Path
 
 import pandas as pd
 
@@ -51,6 +52,47 @@ class OPFFile(object):
         zf.extractall(tempdir)
         db_path = os.path.join(tempdir, 'db')
         os.system(f'open {db_path}')
+
+    def write(self, path: Path = None, overwrite_original=False, unzipped=False):
+        if not path and not overwrite_original:
+            raise ValueError('You haven\'t specified the path to write the files. If you want to overwrite the original'
+                             ' file, set overwrite_original to True')
+
+        if path and overwrite_original:
+            raise ValueError('You\'ve specified the path and set overwrite_original to True - you can only do one of '
+                             'those')
+
+        path = path or self.path
+
+        if unzipped:
+            if path.exists() and not path.is_dir():
+                raise ValueError('Unzipped is set to True but supplied path is not a directory.')
+            else:
+                path.mkdir(parents=True, exist_ok=True)
+                self._write_to_dir(folder_path=path)
+        else:
+            if not path.name.endswith('.opf'):
+                raise ValueError('Supplied path does not end with .opf as expected')
+            else:
+                self._write_to_opf(path)
+
+    def _write_to_dir(self, folder_path):
+        for filename in self.filenames_in_archive:
+            filepath = folder_path / filename
+            if filename == 'db':
+                with filepath.open('w') as f:
+                    f.write(''.join(self.db))
+            else:
+                with filepath.open('wb') as f:
+                    f.write(self.other_components[filename])
+
+    def _write_to_opf(self, path):
+        with ZipFile(path, mode='w', compression=ZIP_DEFLATED) as opf_zipped:
+            for filename in self.filenames_in_archive:
+                if filename == 'db':
+                    opf_zipped.writestr('db', self.db)
+                else:
+                    opf_zipped.writestr(filename, self.other_components[filename])
 
 
 class OPFDataFrame(object):
