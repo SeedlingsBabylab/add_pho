@@ -7,25 +7,43 @@ import pandas as pd
 
 
 class OPFFile(object):
+    SKIP_PREFIXES = ('.DS_Store', '__MACOSX/')
+
     def __init__(self, path):
         self.path = path
-        self.db, self.other = self.load()
+        self.loaded = False
+        self.db = None
+        self.other_components = None
+        self.filenames_in_archive = None
+        self.load()
 
     def load(self):
-        with ZipFile(self.path, 'r') as zpf:
-            assert 'db' in zpf.namelist(), f'The file at {self.path} does not contain "db". Not an OPF file?'
+        if self.path.is_dir():
+            raise NotImplementedError('Reading unarchived version from a folder is not yet implemented')
+
+        with ZipFile(self.path, 'r') as opf_zipped:
+            assert 'db' in opf_zipped.namelist(), f'The file at {self.path} does not contain "db". Not an OPF file?'
 
             # Annotations
-            with zpf.open('db', 'r') as f:
-                # zpf.open reads files in binary mode
-                db = f.read().decode('utf-8')
+            with opf_zipped.open('db', 'r') as db_zipped:
+                # ZipFile.open reads files in the binary mode
+                db = db_zipped.read().decode('utf-8')
 
-            # Other components
-            other_files = {name: zpf.open(name, 'r').read()
-                           for name in zpf.namelist()
-                           if name != 'db'}
+            filenames_in_archive = opf_zipped.namelist()
 
-        return db, other_files
+            # Skip macos-specific hidden files
+            filenames_in_archive = [fn for fn in filenames_in_archive
+                                    if not any(fn.startswith(prefix) for prefix in self.SKIP_PREFIXES)]
+
+            other_components = {
+                name: opf_zipped.open(name, 'r').read()
+                for name in filenames_in_archive
+                if name != 'db'}
+
+            self.db = db
+            self.filenames_in_archive = filenames_in_archive
+            self.other_components = other_components
+            self.loaded = True
 
     def read_in_editor(self):
         zf = ZipFile(self.path)
