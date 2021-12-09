@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from opf import OPFFile, OPFDataFrame
+from opf import OPFFile, OPFDataFrame, DATETIME_FORMAT
 
 
 PHO_PREFIX = r'^%pho:?(?:&|\s+)'
@@ -18,10 +18,8 @@ def collect_all_chi(opf: OPFDataFrame):
 
     # For the fuzzy merging (time_end of CHI and %pho being approximately equal), we will need time_end to be a numeric
     # (datetime in this case) column and sorted.
+    df['time_end'] = pd.to_datetime(df.time_end, format=DATETIME_FORMAT)
     df.sort_values(by='time_end', inplace=True)
-    # To convert time to datetime, we will add an arbitrary date.
-    random_date = '1988-11-01'
-    df['time_end'] = pd.to_datetime(random_date + " " + df.time_end.astype(str))
 
     # Find child utterance and pho cells
     is_chi = df.speaker == 'CHI'
@@ -73,6 +71,8 @@ with opf_file_path_list.open('r', encoding='utf-8') as f:
 
 # Read and convert to dataframes
 opf_files = list(map(OPFFile, opf_paths))
+for of in opf_files:
+    of.load()
 opf_dfs = list(map(OPFDataFrame, opf_files))
 
 # Find all the CHIs, the corresponding phos, and classify them

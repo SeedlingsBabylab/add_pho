@@ -7,6 +7,10 @@ from pathlib import Path
 import pandas as pd
 
 
+# This is not exactly correct. datavyu uses milliseconds and this uses microseconds adding three extra zeros
+DATETIME_FORMAT = '%H:%M:%S:%f'
+
+
 class OPFFile(object):
     SKIP_PREFIXES = ('.DS_Store', '__MACOSX/')
 
@@ -98,13 +102,23 @@ class OPFFile(object):
 class OPFDataFrame(object):
     def __init__(self, opf_file: OPFFile):
         self.opf_file = opf_file
+        self.prefix = None
+        self.column_definitions = None
         self.df = self._opf_to_pandas_df()
+        # assert self._can_be_reversed()
 
     def _opf_to_pandas_df(self):
+        db_lines = self.opf_file.db.rstrip().split('\n')
+        # Sometimes the last line is empty - delete it
+        if not db_lines[-1]:
+            del db_lines[-1]
+        self.prefix = db_lines[0]
+        self.column_definitions = db_lines[1]
+
         # Extract field names
         # There is a single datavyu column "labeled_object" defined in the second line of "db".
         # The format of this line is <column-definition>-<field_definitions>
-        field_definitions = self.opf_file.db[1].split('-')[1]
+        field_definitions = self.column_definitions.split('-')[1]
         # Field definitions are comma-separated, each definition has the following format: <field_name>|<field_type>
         field_names = [field_definition.split('|')[0] for field_definition in field_definitions.split(',')]
         # The first two columns contain timestamps
@@ -116,14 +130,44 @@ class OPFDataFrame(object):
             values = row.split(',', maxsplit=2)
             # Commas within filed values are escaped by a backslash - we don't want to split on those
             values = values[:2] + re.split(r'(?<!\\),', values[2].strip('()'))
+            # If, for some reason, a row is missing commas (not just values!), pad it with empty fields
+            values = values + [''] * (len(field_names) - len(values))
             return values
-        data = list(map(row_to_values, self.opf_file.db[2:]))
+
+        data = list(map(row_to_values, db_lines[2:]))
 
         # Bind
         df = pd.DataFrame(columns=field_names, data=data)
 
-        # Format time
-        df['time_start'] = pd.to_datetime(df.time_start, format='%H:%M:%S:%f').dt.time
-        df['time_end'] = pd.to_datetime(df.time_end, format='%H:%M:%S:%f').dt.time
-
         return df
+
+    def __str__(self):
+        """
+        Converts back to text format
+        :return: str
+        """
+        # Reformat data into single column of the format <time>,<time>,(<col1>,...,<col2>)
+        df = self.df
+        time_columns = ('time_start', 'time_end')
+        other_columns = ~df.columns.isin(time_columns)
+        data = (pd.concat([
+            # Time columns
+            df.loc[:, time_columns],
+            # All the other columns put together in parentheses and separated by commas
+            df.loc[:, other_columns]
+              .astype(str)
+              .agg(lambda values: f'({",".join(values)})', axis=1)
+            ], axis=1)
+            .agg(','.join, axis=1)
+        )
+
+        return '\n'.join([self.prefix,
+                          self.column_definitions,
+                          *data.to_list()])
+
+    def can_be_reversed(self):
+        """
+        Can we reconstruct the db in the original file up to an empty line at the end?
+        :return:
+        """
+        return str(self) == self.opf_file.db.rstrip()
