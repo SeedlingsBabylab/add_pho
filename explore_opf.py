@@ -238,6 +238,7 @@ for opf_df in no_pho_field_dfs:
 # Move the transcription
 is_pho_in_cell = (~is_odd & full.is_pho_cell & full.is_pho_cell & full.is_pho_field &
                   full.is_pho_field_filled.isin((False, float('nan'))))
+assert is_pho_in_cell.sum() == 0
 
 for path, sub_df in full[is_pho_in_cell].groupby('file_path'):
     opf_df = next(opf_df for opf_df in opf_dfs if opf_df.opf_file.path == path)
@@ -264,22 +265,20 @@ for path, sub_df in full[is_pho_in_cell].groupby('file_path'):
     output_path = backup_dir / opf_df.opf_file.path.stem
     opf_df.opf_file.write(path=output_path, unzipped=True)
 
-# check the diff and commit
-# assert False
+if is_pho_in_cell.sum() > 0:
+    # Overwrite the original files
+    for path, sub_df in full[is_pho_in_cell].groupby('file_path'):
+        opf_df = next(opf_df for opf_df in opf_dfs if opf_df.opf_file.path == path)
+        opf_df.opf_file.write(overwrite_original=True)
 
-# Overwrite the original files
-for path, sub_df in full[is_pho_in_cell].groupby('file_path'):
-    opf_df = next(opf_df for opf_df in opf_dfs if opf_df.opf_file.path == path)
-    opf_df.opf_file.write(overwrite_original=True)
+    opf_backup_script = seedlings_path / 'Scripts_and_Apps/Github/seedlings/path_files/cp_all_opf.sh'
+    os.system(f'bash {opf_backup_script} {opf_file_path_list} {backup_dir}')
 
-opf_backup_script = seedlings_path / 'Scripts_and_Apps/Github/seedlings/path_files/cp_all_opf.sh'
-os.system(f'bash {opf_backup_script} {opf_file_path_list} {backup_dir}')
+    cwd = os.getcwd()
+    try:
+        os.chdir(backup_dir)
+        os.system('git status')
+    finally:
+        os.chdir(cwd)
 
-cwd = os.getcwd()
-try:
-    os.chdir(backup_dir)
-    os.system('git status')
-finally:
-    os.chdir(cwd)
-
-# check that nothing has changed in the backup
+    # check that nothing has changed in the backup
