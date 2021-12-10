@@ -75,6 +75,11 @@ for of in opf_files:
     of.load()
 opf_dfs = list(map(OPFDataFrame, opf_files))
 
+
+problems = [df for df in opf_dfs if not df.can_be_reversed()]
+assert len(problems) == 0
+
+
 # Find all the CHIs, the corresponding phos, and classify them
 all_chis_with_phos = pd.concat(
     objs=map(collect_all_chi, opf_dfs),
