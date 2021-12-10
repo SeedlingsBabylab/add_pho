@@ -198,10 +198,17 @@ make_pivot(all_chis_with_phos_with_flags)
 
 
 # Filter odd ones
+
+
 full = all_chis_with_phos_with_flags
 is_odd = (full.id_pho.isin(orphans.id_pho) |
           full.id.isin(duplicates.id) | full.id_pho.isin(duplicates.id_pho) |
           full.id.isin(inconsistent_ones.id))
+
+# The remaining duplicates are not really duplicates, they are just two utterance and then one pho cell.
+# The timestamp of the pho cell corresponds exactly to the timestamp of the second CHI cell.
+is_odd = is_odd & ~full.id.isin(duplicates[duplicates.time_end == duplicates.time_end_pho].id)
+
 
 make_pivot(all_chis_with_phos_with_flags[~is_odd])
 
@@ -238,7 +245,7 @@ for opf_df in no_pho_field_dfs:
 # Move the transcription
 is_pho_in_cell = (~is_odd & full.is_pho_cell & full.is_pho_cell & full.is_pho_field &
                   full.is_pho_field_filled.isin((False, float('nan'))))
-assert is_pho_in_cell.sum() == 0
+
 
 for path, sub_df in full[is_pho_in_cell].groupby('file_path'):
     opf_df = next(opf_df for opf_df in opf_dfs if opf_df.opf_file.path == path)
@@ -264,6 +271,9 @@ for path, sub_df in full[is_pho_in_cell].groupby('file_path'):
     # Write to backup
     output_path = backup_dir / opf_df.opf_file.path.stem
     opf_df.opf_file.write(path=output_path, unzipped=True)
+
+assert is_pho_in_cell.sum() == 0
+# If stopped here, check the backup repo and commit before proceeding
 
 if is_pho_in_cell.sum() > 0:
     # Overwrite the original files
