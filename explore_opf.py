@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -194,3 +195,50 @@ def make_pivot(chis):
 
 
 make_pivot(all_chis_with_phos_with_flags)
+
+
+# Filter odd ones
+full = all_chis_with_phos_with_flags
+is_odd = (full.id_pho.isin(orphans.id_pho) |
+          full.id.isin(duplicates.id) | full.id_pho.isin(duplicates.id_pho) |
+          full.id.isin(inconsistent_ones.id))
+
+# Add the pho field
+no_pho_field_paths = full[~is_odd & ~full.is_pho_field].file_path.unique()
+no_pho_field_dfs = [opf_df for opf_df in opf_dfs if opf_df.opf_file.path in no_pho_field_paths]
+assert len(no_pho_field_paths) == len(no_pho_field_dfs)
+assert not any('pho' in opf_df.df.columns for opf_df in no_pho_field_dfs)
+
+
+assert no_pho_field_paths.size == 0
+
+backup_dir = seedlings_path / 'Compiled_Data/annotated_opf/annotated_opf'
+assert backup_dir.exists()
+
+for opf_df in no_pho_field_dfs:
+    if 'pho' in opf_df.column_definitions or 'pho' in opf_df.df.columns:
+        raise ValueError('pho is already a field')
+
+    opf_df.column_definitions += ',pho|NOMINAL'
+    opf_df.df['pho'] = ''
+
+    opf_df.opf_file.db = str(opf_df)
+
+    # Write to backup first, commit changes
+    output_path = backup_dir / opf_df.opf_file.path.stem
+    opf_df.opf_file.write(path=output_path, unzipped=True)
+
+
+os.chdir(backup_dir.parent)
+os.system('git commit -m "add pho field to all"')
+
+
+for opf_df in no_pho_field_dfs:
+    # Overwrite originals
+    opf_df.opf_file.write(overwrite_original=True)
+
+opf_backup_script = seedlings_path / 'Scripts_and_Apps/Github/seedlings/path_files/cp_all_opf.sh'
+os.system(f'bash {opf_backup_script} {opf_file_path_list} {backup_dir}')
+
+os.system(f'git status')
+
