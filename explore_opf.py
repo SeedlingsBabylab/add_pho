@@ -14,7 +14,7 @@ def collect_all_chi(opf: OPFDataFrame):
     :param opf: OPFDataFrame object
     :return: opf.df with only the CHI rows and with additional columns corresponding to the pho cell.
     """
-    df: pd.DataFrame = opf.df
+    df: pd.DataFrame = opf.df.copy()
 
     # For the fuzzy merging (time_end of CHI and %pho being approximately equal), we will need time_end to be a numeric
     # (datetime in this case) column and sorted.
