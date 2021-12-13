@@ -319,17 +319,17 @@ if is_pho_in_cell.sum() > 0:
 # # Stop execution here so that we don't proceed until manually checking and committing the backup
 # 1/0
 
-# Update the original files, once checked and committed the backukp
-for opf_df in opf_dfs:
-    opf_df.opf_file.write(overwrite_original=True)
-
-# Run the backup script
-opf_backup_script = seedlings_path / 'Scripts_and_Apps/Github/seedlings/path_files/cp_all_opf.sh'
-os.system(f'bash {opf_backup_script} {opf_file_path_list} {backup_dir}')
-
-cwd = os.getcwd()
-try:
-    os.chdir(backup_dir)
-    os.system('git status')
-finally:
-    os.chdir(cwd)
+# # Update the original files, once checked and committed the backukp
+# for opf_df in opf_dfs:
+#     opf_df.opf_file.write(overwrite_original=True)
+#
+# # Run the backup script
+# opf_backup_script = seedlings_path / 'Scripts_and_Apps/Github/seedlings/path_files/cp_all_opf.sh'
+# os.system(f'bash {opf_backup_script} {opf_file_path_list} {backup_dir}')
+#
+# cwd = os.getcwd()
+# try:
+#     os.chdir(backup_dir)
+#     os.system('git status')
+# finally:
+#     os.chdir(cwd)
