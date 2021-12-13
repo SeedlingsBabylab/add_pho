@@ -292,3 +292,44 @@ if is_pho_in_cell.sum() > 0:
         os.chdir(cwd)
 
     # check that nothing has changed in the backup
+
+
+# # # Multi-word-utterances and first words
+# # Those also have pho cells associated with them
+# for opf_df in opf_dfs:
+#     is_pho = opf_df.df.object.str.contains(PHO_PREFIX)
+#     if is_pho.sum() == 0:
+#         continue
+#
+#     pho_indices_to_drop = list()
+#     for index, row in opf_df.df[is_pho].iterrows():
+#         previous_object = opf_df.df.loc[index - 1].object
+#         if (previous_object.startswith('%com: first word') or
+#                 previous_object.startswith('%com: mwu')):
+#             # copy the transcription from the pho cell
+#             opf_df.df.loc[index - 1].pho = row.object
+#             pho_indices_to_drop.append(index)
+#
+#     if pho_indices_to_drop:
+#         opf_df.df.drop(index=pho_indices_to_drop, inplace=True)
+#         opf_df.opf_file.db = str(opf_df)
+#         output_path = backup_dir / opf_df.opf_file.path.stem
+#         opf_df.opf_file.write(path=output_path, unzipped=True)
+#
+# # Stop execution here so that we don't proceed until manually checking and committing the backup
+# 1/0
+
+# Update the original files, once checked and committed the backukp
+for opf_df in opf_dfs:
+    opf_df.opf_file.write(overwrite_original=True)
+
+# Run the backup script
+opf_backup_script = seedlings_path / 'Scripts_and_Apps/Github/seedlings/path_files/cp_all_opf.sh'
+os.system(f'bash {opf_backup_script} {opf_file_path_list} {backup_dir}')
+
+cwd = os.getcwd()
+try:
+    os.chdir(backup_dir)
+    os.system('git status')
+finally:
+    os.chdir(cwd)
