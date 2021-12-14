@@ -2,6 +2,21 @@ This code adds/edits placeholders for phonetic transcriptions to annotations (CH
 The code intentionally breaks if there are any formatting or other inconsistencies.
 If there are any errors, run in interactive mode to investigate.
 
+# OPF files
+
+Run `add_pho_to_cha/expore_opf.py` interactively.
+The script is very fragile and each part was written only to work for the version of opf files at the time of running the code.
+Most likely, nothing bad will happen if you write the script as a whole - it should break if there are any new changes introduced.
+The code that overwrites the original opf files is commented out.
+
+Most of the changes were run like this:
+- update the backup files,
+- check manually that there are no unexpected changes, commit,
+- overwrite the original files,
+- run the backup script - there should be no new changes to the backup repo,
+- if there are new changes - figure the reason manually.
+
+
 # CHA files
 
 Run 

@@ -1,0 +1,4 @@
+file_path,time_start,time_end,object,utterance_type,object_present,speaker,id,pho,object_pho,id_pho,time_start_pho,time_end_pho,is_pho_cell,is_pho_cell_filled,is_pho_field,is_pho_field_filled
+/Volumes/pn-opus/Seedlings/Subject_Files/08/08_17/Home_Visit/Coding/Video_Annotation/08_17_sparse_code.opf,00:10:48:561,1900-01-01 00:10:52.712,cat,q,n,CHI,0xa8846b,%pho: d&h,%pho: wEd6d&hbudi,0x25f9cc,00:10:52:411,1900-01-01 00:10:52.411,True,True,True,True
+/Volumes/pn-opus/Seedlings/Subject_Files/08/08_17/Home_Visit/Coding/Video_Annotation/08_17_sparse_code.opf,00:19:08:282,1900-01-01 00:19:10.265,bag,d,y,CHI,0x8ce2c0,%pho: bal,%pho: Eb6baI,0x8b1054,00:19:10:265,1900-01-01 00:19:10.265,True,True,True,True
+/Volumes/pn-opus/Seedlings/Subject_Files/12/12_17/Home_Visit/Coding/Video_Annotation/12_17_sparse_code.opf,00:52:48:407,1900-01-01 00:52:49.699,bug,d,y,CHI,0xd226fb,%pho: bUx,%pho: EdjEbUx,0x0eef0d,00:52:49:699,1900-01-01 00:52:49.699,True,True,True,True
