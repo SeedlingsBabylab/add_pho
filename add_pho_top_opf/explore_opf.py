@@ -99,7 +99,7 @@ orphans = orphans[['file_path', 'object_pho', 'id_pho', 'time_start_pho', 'time_
 
 
 # Save
-orphans_output_path = Path('repo') / 'reports' / 'orphan_phos.csv'
+orphans_output_path = Path('reports') / 'orphan_phos.csv'
 orphans_output_path.parent.mkdir(exist_ok=True)
 orphans.to_csv(orphans_output_path, index=False)
 
@@ -121,7 +121,7 @@ duplicates = pd.concat(
         names=['duplicate_type', 'index']
     ).reset_index(0)
 
-duplicates_output_path = Path('repo') / 'reports' / 'duplicates.csv'
+duplicates_output_path = Path('reports') / 'duplicates.csv'
 duplicates_output_path.parent.mkdir(exist_ok=True)
 duplicates.to_csv(duplicates_output_path, index=False)
 
@@ -180,7 +180,7 @@ inconsistent_ones = all_chis_with_phos_with_flags[
     all_chis_with_phos_with_flags.is_pho_cell_filled
     & all_chis_with_phos_with_flags.is_pho_field_filled]
 
-inconsistent_output_path = Path('repo') / 'reports' / 'inconsistent_ones.csv'
+inconsistent_output_path = Path('reports') / 'inconsistent_ones.csv'
 inconsistent_output_path.parent.mkdir(exist_ok=True)
 inconsistent_ones.to_csv(inconsistent_output_path, index=False)
 
